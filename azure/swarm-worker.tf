@@ -1,4 +1,4 @@
-resource "kubernetes_deployment" "swarm-load" {
+resource "kubernetes_deployment" "swarm-worker-load" {
   count = var.enable_swarm ? 1 : 0
 
   depends_on = [data.kubernetes_namespace.namespace]
@@ -47,7 +47,7 @@ resource "kubernetes_deployment" "swarm-load" {
   }
 }
 
-resource "kubernetes_service" "swarm-load" {
+resource "kubernetes_service" "swarm-worker-load" {
   count = var.enable_swarm ? 1 : 0
 
   depends_on = [data.kubernetes_namespace.namespace]
