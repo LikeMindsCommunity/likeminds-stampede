@@ -25,7 +25,7 @@ resource "kubernetes_deployment" "kettle-deployment" {
       }
       spec {
         image_pull_secrets {
-            name = "acr-secret"
+            name = local.image_pull_secrets_name
         }
         container {
           image = var.kettle_app_docker_image
@@ -61,7 +61,7 @@ resource "kubernetes_service" "kettle-service" {
       port        = local.http_port_8080
       target_port = local.http_port_8080
     }
-    type = "ClusterIP"
+    type = local.type_cluster_ip
   }
 }
 
@@ -81,7 +81,7 @@ resource "kubernetes_ingress_v1" "kettle-ingress" {
   }
 
   spec {
-    ingress_class_name = "webapprouting.kubernetes.azure.com"
+    ingress_class_name = local.ingress_class_name
     rule {
     #   host = "kettle-loadtest.likeminds.community"
       http {
