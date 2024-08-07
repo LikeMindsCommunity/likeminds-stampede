@@ -1,5 +1,4 @@
-# Purpose: This file is used to create the resources for the Kettle application.
-
+# Create kubernetes deployment for kettle
 resource "kubernetes_deployment" "kettle-deployment" {
   count = var.enable_kettle ? 1 : 0
   depends_on = [data.kubernetes_namespace.namespace]
@@ -42,15 +41,13 @@ resource "kubernetes_deployment" "kettle-deployment" {
   }
 }
 
+# Create kubernetes service for kettle
 resource "kubernetes_service" "kettle-service" {
   count = var.enable_kettle ? 1 : 0
   depends_on = [data.kubernetes_namespace.namespace]
   metadata {
     name      = var.kettle_app_name
     namespace = var.namespace_name
-    annotations = {
-    #   "service.beta.kubernetes.io/azure-load-balancer-internal" = "true"
-    }
   }
   spec {
     selector = {
@@ -65,6 +62,7 @@ resource "kubernetes_service" "kettle-service" {
   }
 }
 
+# Create kubernetes ingress for kettle
 resource "kubernetes_ingress_v1" "kettle-ingress" {
   count = var.enable_kettle ? 1 : 0
 
@@ -83,7 +81,7 @@ resource "kubernetes_ingress_v1" "kettle-ingress" {
   spec {
     ingress_class_name = local.ingress_class_name
     rule {
-    #   host = "kettle-loadtest.likeminds.community"
+      host = local.kettle_load_host
       http {
         path {
           path = "/"
@@ -99,8 +97,8 @@ resource "kubernetes_ingress_v1" "kettle-ingress" {
         }
       }
     }
-    # tls {
-    #    secret_name = "app-deploy-load-secret"
-    # }
+    tls {
+       secret_name = local.load_domain_tls_secret_name
+    }
   }
 }

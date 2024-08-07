@@ -33,6 +33,7 @@ locals {
   ingress_class_name = "webapprouting.kubernetes.azure.com"
   
   image_pull_secrets_name = "acr-secret"
+  load_domain_tls_secret_name = "load-domain-tls-secret"
 
   caravan_celery_secret_name = "caravan-celery-secret"
   broker_url_env_name = "CELERY_BROKER_URL"
@@ -40,4 +41,9 @@ locals {
   rabbitmq_user_secret_name = "rabbitmq-user-secret"
   rabbitmq_default_user_key = "RABBITMQ_DEFAULT_USER"
   rabbitmq_default_password_key = "RABBITMQ_DEFAULT_PASS"
+
+  kettle_load_host = "kettle-loadtest.likeminds.community"
+  caravan_load_host = "caravan-loadtest.likeminds.community"
+  swarm_load_host = "swarm-loadtest.likeminds.community"
+  skulk_load_host = "skulk-loadtest.likeminds.community"
 }

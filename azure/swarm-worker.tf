@@ -1,3 +1,4 @@
+# Create kubernetes deployment for swarm worker
 resource "kubernetes_deployment" "swarm-worker-load" {
   count = var.enable_swarm ? 1 : 0
 
@@ -47,6 +48,7 @@ resource "kubernetes_deployment" "swarm-worker-load" {
   }
 }
 
+# Create kubernetes service for swarm worker
 resource "kubernetes_service" "swarm-worker-load" {
   count = var.enable_swarm ? 1 : 0
 

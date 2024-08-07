@@ -1,5 +1,4 @@
-# Purpose: This file is used to create the caravan deployment in the Azure cloud.
-
+# Create kubernetes deployment for caravan
 resource "kubernetes_deployment" "caravan-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -49,6 +48,7 @@ resource "kubernetes_deployment" "caravan-load" {
   }
 }
 
+# Create kubernetes service for caravan
 resource "kubernetes_service" "caravan-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -57,9 +57,6 @@ resource "kubernetes_service" "caravan-load" {
   metadata {
     name      = var.caravan_app_name
     namespace = var.namespace_name
-    annotations = {
-    #   "cloud.google.com/neg": "{\"ingress\": true}"
-    }
   }
 
   spec {
@@ -75,6 +72,7 @@ resource "kubernetes_service" "caravan-load" {
   }
 }
 
+# Create kubernetes ingress for caravan
 resource "kubernetes_ingress_v1" "caravan-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -91,10 +89,10 @@ resource "kubernetes_ingress_v1" "caravan-load" {
   spec {
     ingress_class_name = local.ingress_class_name
     rule {
-    #   host = "caravan-loadtest.likeminds.community"
+      host = local.caravan_load_host
       http {
         path {
-          path = "/caravan"
+          path = "/"
           path_type = "Prefix"
           backend {
             service {
@@ -108,27 +106,8 @@ resource "kubernetes_ingress_v1" "caravan-load" {
       }
     }
 
-    # tls {
-    #   secret_name = "app-deploy-load-secret"
-    # }
+    tls {
+      secret_name = local.load_domain_tls_secret_name
+    }
   }
 }
-
-# resource "kubernetes_manifest" "caravan-load-frontend-config" {
-
-#   depends_on = [kubernetes_namespace.app-deploy-load]
-
-#   manifest = {
-#     apiVersion = "networking.gke.io/v1beta1"
-#     kind       = "FrontendConfig"
-#     metadata = {
-#       name      = "caravan-load-frontend-config"
-#       namespace = var.namespace_name
-#     }
-#     spec = {
-#       redirectToHttps = {
-#         enabled = true
-#       }
-#     }
-#   }
-# }

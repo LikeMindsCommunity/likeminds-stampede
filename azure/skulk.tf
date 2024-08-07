@@ -1,5 +1,4 @@
-# Purpose: This file is used to create the skulk deployment in the Azure cloud.
-
+# Create kubernetes deployment for skulk
 resource "kubernetes_deployment" "skulk-load" {
   count = var.enable_skulk ? 1 : 0
 
@@ -49,6 +48,7 @@ resource "kubernetes_deployment" "skulk-load" {
   }
 }
 
+# Create kubernetes service for skulk
 resource "kubernetes_service" "skulk-load" {
   count = var.enable_skulk ? 1 : 0
 
@@ -57,9 +57,6 @@ resource "kubernetes_service" "skulk-load" {
   metadata {
     name      = var.skulk_app_name
     namespace = var.namespace_name
-    annotations = {
-    #   "cloud.google.com/neg": "{\"ingress\": true}"
-    }
   }
 
   spec {
@@ -75,6 +72,7 @@ resource "kubernetes_service" "skulk-load" {
   }
 }
 
+# Create kubernetes ingress for skulk
 resource "kubernetes_ingress_v1" "skulk-load" {
   count = var.enable_skulk ? 1 : 0
 
@@ -91,7 +89,7 @@ resource "kubernetes_ingress_v1" "skulk-load" {
   spec {
     ingress_class_name = local.ingress_class_name
     rule {
-    #   host = "skulk-loadtest.likeminds.community"
+      host = local.skulk_load_host
       http {
         path {
           path = "/"
@@ -108,8 +106,8 @@ resource "kubernetes_ingress_v1" "skulk-load" {
       }
     }
 
-    # tls {
-    #   secret_name = "app-deploy-load-secret"
-    # }
+    tls {
+      secret_name = local.load_domain_tls_secret_name
+    }
   }
 }

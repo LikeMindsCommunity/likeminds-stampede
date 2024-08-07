@@ -1,3 +1,4 @@
+# Create kubernetes deployment for swarm
 resource "kubernetes_deployment" "swarm-load" {
   count = var.enable_swarm ? 1 : 0
 
@@ -47,6 +48,7 @@ resource "kubernetes_deployment" "swarm-load" {
   }
 }
 
+# Create kubernetes service for swarm
 resource "kubernetes_service" "swarm-load" {
   count = var.enable_swarm ? 1 : 0
 
@@ -55,9 +57,6 @@ resource "kubernetes_service" "swarm-load" {
   metadata {
     name      = var.swarm_app_name
     namespace = var.namespace_name
-    annotations = {
-      # "cloud.google.com/neg": "{\"ingress\": true}"
-    }
   }
 
   spec {
@@ -73,6 +72,7 @@ resource "kubernetes_service" "swarm-load" {
   }
 }
 
+# Create kubernetes ingress for swarm
 resource "kubernetes_ingress_v1" "swarm-load" {
   count = var.enable_swarm ? 1 : 0
 
@@ -89,7 +89,7 @@ resource "kubernetes_ingress_v1" "swarm-load" {
   spec {
     ingress_class_name = local.ingress_class_name
     rule {
-      # host = "swarm-loadtest.likeminds.community"
+      host = local.swarm_load_host
       http {
         path {
           path = "/"
@@ -106,8 +106,8 @@ resource "kubernetes_ingress_v1" "swarm-load" {
       }
     }
 
-    # tls {
-    #   secret_name = "app-deploy-load-secret"
-    # }
+    tls {
+      secret_name = local.load_domain_tls_secret_name
+    }
   }
 }

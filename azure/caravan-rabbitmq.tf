@@ -1,3 +1,4 @@
+# Create kubernetes secret for caravan-rabbitmq
 resource "kubernetes_secret_v1" "rabbitmq-user-secret" {
   count = var.enable_caravan ? 1 : 0
 
@@ -15,6 +16,7 @@ resource "kubernetes_secret_v1" "rabbitmq-user-secret" {
 
 }
 
+# Create kubernetes deployment for caravan-rabbitmq
 resource "kubernetes_deployment" "caravan-rabbitmq-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -81,6 +83,7 @@ resource "kubernetes_deployment" "caravan-rabbitmq-load" {
   }
 }
 
+# Create kubernetes service for caravan-rabbitmq
 resource "kubernetes_service" "caravan-rabbitmq-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -89,9 +92,6 @@ resource "kubernetes_service" "caravan-rabbitmq-load" {
   metadata {
     name = var.caravan_rabbitmq_app_name
     namespace = var.namespace_name
-    annotations = {
-      # "cloud.google.com/neg": "{\"ingress\": true}"
-    }
   }
   spec {
     selector = {

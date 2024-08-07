@@ -1,4 +1,4 @@
-
+# Create kubernetes secret for caravan-celery for broker url
 resource "kubernetes_secret_v1" "caravan-celery-secret" {
   count = var.enable_caravan ? 1 : 0
 
@@ -15,6 +15,7 @@ resource "kubernetes_secret_v1" "caravan-celery-secret" {
 
 }
 
+# Create kubernetes deployment for caravan-celery
 resource "kubernetes_deployment" "caravan-celery-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -74,6 +75,7 @@ resource "kubernetes_deployment" "caravan-celery-load" {
   }
 }
 
+# Create kubernetes service for caravan-celery
 resource "kubernetes_service" "caravan-celery-load" {
   count = var.enable_caravan ? 1 : 0
 
@@ -82,9 +84,6 @@ resource "kubernetes_service" "caravan-celery-load" {
   metadata {
     name = var.caravan_celery_app_name
     namespace = var.namespace_name
-    annotations = {
-      # "cloud.google.com/neg": "{\"ingress\": true}"
-    }
   }
 
   spec {
