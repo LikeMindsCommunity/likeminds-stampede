@@ -24,6 +24,19 @@ variable "namespace_name" {
   default     = "likeminds-load"
 }
 
+variable "vnet_name" {
+  description = "The name of the virtual network."
+  type        = string
+  default     = "likeminds-load-virtual-network-central-india"
+}
+
+variable "subnet_name" {
+  description = "The name of the subnet."
+  type        = string
+  default     = "likeminds-load-app-subnet"
+}
+
+
 ## Kettle Variables
 variable "enable_kettle" {
   description = "If to enable the Kettle app."
@@ -266,18 +279,6 @@ variable "skulk_pods" {
 }
 
 ## Elasticsearch-VM variables
-variable "vnet_name" {
-  description = "The name of the virtual network."
-  type        = string
-  default     = "likeminds-load-virtual-network-central-india"
-}
-
-variable "subnet_name" {
-  description = "The name of the subnet."
-  type        = string
-  default     = "likeminds-load-app-subnet"
-}
-
 variable "es_vm_admin_user_name" {
   description = "The admin user name for the Elasticsearch VM."
   type        = string
@@ -291,10 +292,11 @@ variable "es_vm_admin_password" {
 }
 
 
+## Jenkins-VM variables
 variable "jenkins_vm_admin_user_name" {
   description = "The admin user name for the Elasticsearch VM."
-  default     = "likeminds-load-jenkins-admin"
   type        = string
+  default     = "likeminds-load-jenkins-admin"
 }
 
 variable "jenkins_vm_admin_password" {
