@@ -289,3 +289,16 @@ variable "es_vm_admin_password" {
   type        = string
   default     = "!Likeminds-es-password"
 }
+
+
+variable "jenkins_vm_admin_user_name" {
+  description = "The admin user name for the Elasticsearch VM."
+  default     = "likeminds-load-jenkins-admin"
+  type        = string
+}
+
+variable "jenkins_vm_admin_password" {
+  description = "The admin password for the Elasticsearch VM."
+  type        = string
+  default     = "!Likeminds-jenkins-password"
+}

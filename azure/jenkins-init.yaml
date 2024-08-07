@@ -1,0 +1,9 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+
+runcmd:
+  - systemctl start docker
+  - systemctl enable docker
+  - docker run -d -p 80:8080 --name jenkins jenkins/jenkins:lts

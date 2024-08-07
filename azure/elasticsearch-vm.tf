@@ -1,18 +1,5 @@
-# Use existing virtual network
-data "azurerm_virtual_network" "vnet" {
-  name                = var.vnet_name
-  resource_group_name = var.resource_group_name
-}
-
-# Use existing subnet
-data "azurerm_subnet" "subnet" {
-  name                 = var.subnet_name
-  virtual_network_name = data.azurerm_virtual_network.vnet.name
-  resource_group_name  = var.resource_group_name
-}
-
 # Define public IP
-resource "azurerm_public_ip" "public_ip" {
+resource "azurerm_public_ip" "es_public_ip" {
   name                = local.es_public_ip_name
   location            = var.resource_location
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -21,7 +8,7 @@ resource "azurerm_public_ip" "public_ip" {
 }
 
 # Define network interface
-resource "azurerm_network_interface" "nic" {
+resource "azurerm_network_interface" "es_nic" {
   name                = local.es_nic_name
   location            = var.resource_location
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -30,12 +17,12 @@ resource "azurerm_network_interface" "nic" {
     name                          = local.es_nic_config_name
     subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = local.es_private_ip_allocation
-    public_ip_address_id          = azurerm_public_ip.public_ip.id
+    public_ip_address_id          = azurerm_public_ip.es_public_ip.id
   }
 }
 
 # Define virtual machine
-resource "azurerm_linux_virtual_machine" "vm" {
+resource "azurerm_linux_virtual_machine" "es_vm" {
   name                = local.es_instance_name
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.resource_location
@@ -45,7 +32,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   disable_password_authentication = false
 
   network_interface_ids = [
-    azurerm_network_interface.nic.id,
+    azurerm_network_interface.es_nic.id,
   ]
 
   os_disk {
@@ -67,14 +54,14 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 # Output the public IP address
-output "public_ip_address" {
-  value = azurerm_public_ip.public_ip.ip_address
+output "es_public_ip_address" {
+  value = azurerm_public_ip.es_public_ip.ip_address
   description = "The public IP address of the Elasticsearch VM"
 }
 
 # Output the DNS label
-output "public_ip_dns" {
-  value = azurerm_public_ip.public_ip.fqdn
+output "es_public_ip_dns" {
+  value = azurerm_public_ip.es_public_ip.fqdn
   description = "The DNS label for the public IP address"
 }
 
@@ -92,5 +79,5 @@ locals {
 
     es_dns_label = "elasticsearch-loadtest" # Will resolve to <dns_label>.<region>.cloudapp.azure.com
     
-    es_init_script_path = "${path.module}/cloud-init.yaml"
+    es_init_script_path = "${path.module}/es-init.yaml"
 }
