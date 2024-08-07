@@ -164,7 +164,7 @@ variable "caravan_rabbitmq_password" {
 variable "enable_swarm" {
   description = "If to enable the Swarm app."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "swarm_app_name" {
@@ -224,6 +224,43 @@ variable "swarm_worker_memory" {
 
 variable "swarm_worker_pods" {
   description = "The number of pods for the Swarm worker app."
+  type        = number
+  default     = 1
+}
+
+## Skulk Variables
+variable "enable_skulk" {
+  description = "if to enable skulk app"
+  type       = bool
+  default    = false
+}
+
+variable "skulk_app_name" {
+  description = "The name of the skulk app"
+  type        = string
+  default     = "skulk-load"
+}
+
+variable "skulk_app_docker_image" {
+  description = "The docker image of skulk app"
+  type = string
+  default = "likemindsloadregistry.azurecr.io/likeminds-subscription/skulk"
+}
+
+variable "skulk_cpu" {
+  description = "skulk cpu"
+  type        = string
+  default     = "0.5"
+}
+
+variable "skulk_memory" {
+  description = "skulk memory"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "skulk_pods" {
+  description = "skulk pods count"
   type        = number
   default     = 1
 }
