@@ -9,10 +9,6 @@ pipeline {
         stage("Checkout") {
             steps {
                 checkout scm
-                dir("${env.WORKSPACE_DIR}") {
-                    // This ensures the working directory is set to /azure for subsequent stages
-                    sh 'echo "Changed directory to /azure"'
-                }
             }
         }
 
