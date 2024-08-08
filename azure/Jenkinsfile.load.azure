@@ -5,6 +5,21 @@ pipeline {
         WORKSPACE_DIR = 'azure'
         RESOURCE_GROUP = 'likeminds-load-resource-group'
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
+        KETTLE_BRANCH = 'development'
+    }
+
+    parameters {
+        string(name: 'action', defaultValue: 'plan', description: 'Terraform action - plan/apply/destroy')
+
+        string(name: 'kettle_branch', defaultValue: 'development', description: 'Kettle branch')
+        string(name: 'swarm_branch', defaultValue: 'development', description: 'Swarm branch')
+        string(name: 'caravan_branch', defaultValue: 'development', description: 'Caravan branch')
+        string(name: 'caravan_celery_branch', defaultValue: 'development', description: 'Caravan Celery branch')
+
+        booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle')
+        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm')
+        booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan')
+        booleanParam(name: 'enable_caravan_celery', defaultValue: false, description: 'Enable Caravan Celery')
     }
 
     stages {
@@ -35,25 +50,22 @@ pipeline {
         stage("Build Kettle Docker Image") {
             when {
                 expression {
-                    return params.enable_kettle
-                }
-                expression {
-                    return params.action == 'apply'
+                    return params.enable_kettle && params.action == 'apply'
                 }
             }
             steps {
                 echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${kettle_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/LikeMinds-Authentication/'
-                        sh 'echo "Kettle code cloned"'
+                        git branch: "${params.kettle_branch}", credentialsId: 'ssh-key', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
+                        echo 'Kettle code cloned'
 
-                        sh 'gcloud auth configure-docker asia.gcr.io'
-                        docker.build("kettle:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/Dockerfile.kettle-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-authentication/kettle:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/")
-                        sh 'echo "Kettle Image Creation done"'
+                        // sh 'gcloud auth configure-docker asia.gcr.io'
+                        // docker.build("kettle:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/Dockerfile.kettle-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-authentication/kettle:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/")
+                        // echo 'Kettle Image Creation done'
 
-                        sh 'docker push asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-authentication/kettle:${BUILD_NUMBER}'
-                        sh 'echo "Kettle Image Pushed to GCP"'
+                        // sh 'docker push asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-authentication/kettle:${BUILD_NUMBER}'
+                        // sh 'echo "Kettle Image Pushed to GCP"'
                     }
                 }  
             }
