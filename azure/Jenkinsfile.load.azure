@@ -123,7 +123,9 @@ pipeline {
         stage("Terraform init"){
             steps{
                 script{
-                    sh 'terraform init'
+                    dir("${env.WORKSPACE_DIR}"){
+                        sh 'terraform init'
+                    }
                 }
             }
         }
