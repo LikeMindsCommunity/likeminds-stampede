@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         WORKSPACE_DIR = 'azure'
+        RESOURCE_GROUP = 'likeminds-load-resource-group'
+        AKS_CLUSTER = 'likeminds-load-k8s-cluster'
     }
 
     stages {
@@ -19,7 +21,7 @@ pipeline {
                         sh '''
                             az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
                             az account set --subscription $AZURE_SUBSCRIPTION_ID
-                            az aks get-credentials --resource-group <resource-group> --name <aks-cluster-name>
+                            az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER
                             kubectl config current-context
                             echo "Azure login done & aks cluster credentials"
                         '''
