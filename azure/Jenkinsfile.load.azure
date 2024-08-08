@@ -17,24 +17,16 @@ pipeline {
         stage("Azure login") {
             steps {
                 script {
-                    withCredentials([azureServicePrincipal('f9c8dfcb-eb82-411d-89cd-d4e1dbd30ba4')]) {
+                    withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
                         sh '''
                             az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
                             az account set --subscription $AZURE_SUBSCRIPTION_ID
                             export KUBECONFIG=~/.kube/config
                             az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing
-                            kubectl config current-context
                             kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
                             kubectl get namespaces
                             echo "Azure login done & kubelogin config created"
                         '''
-
-                        // az login --service-principal -u 6ce030de-78c4-4304-b490-0b242e2a2450 -p UVI8Q~JPAyBcRQwsL~5rFL2AYf_lE9cZT7M_eaQh --t 60a040e4-b429-49b4-96c8-197041191644
-                        // az account set --subscription 3eeba89f-90cf-4f98-9c69-b686c50b6171
-                        // export KUBECONFIG=~/.kube/config
-                        // az aks get-credentials --resource-group likeminds-load-resource-group --name likeminds-load-k8s-cluster --overwrite-existing
-                        // kubelogin convert-kubeconfig -l spn --client-id 6ce030de-78c4-4304-b490-0b242e2a2450 --client-secret UVI8Q~JPAyBcRQwsL~5rFL2AYf_lE9cZT7M_eaQh
-
                     }
                 }
             }
