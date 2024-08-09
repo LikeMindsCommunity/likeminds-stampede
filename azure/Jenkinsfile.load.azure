@@ -3,9 +3,11 @@ pipeline {
 
     environment {
         WORKSPACE_DIR = 'azure'
+
         RESOURCE_GROUP = 'likeminds-load-resource-group'
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
-        KETTLE_BRANCH = 'development'
+        ACR_NAME = 'LikemindsLoadRegistry'
+        ACR_LOGIN_SERVER = 'likemindsloadregistry.azurecr.io'
     }
 
     parameters {
@@ -29,7 +31,7 @@ pipeline {
             }
         }
 
-        stage("Azure login") {
+        stage("Azure login & kubectl context set") {
             steps {
                 script {
                     withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
@@ -41,7 +43,7 @@ pipeline {
                             kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
                             kubectl get namespaces
                         '''
-                        echo 'Azure login done & kubectl context set'
+                        echo 'Completed: Azure login done & kubectl context set'
                     }
                 }
             }
@@ -59,6 +61,17 @@ pipeline {
                     dir('likeminds-authentication') {
                         git branch: "${params.kettle_branch}", credentialsId: 'ssh-key', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
                         echo 'Kettle code cloned'
+
+                        // Login to Azure Container Registry
+                        sh 'az acr login --name ${ACR_NAME}'
+
+                        // Build the Docker image
+                        sh 'docker build -t ${ACR_LOGIN_SERVER}/LikeMinds-Authentication/kettle:${env.BUILD_NUMBER} -f ./Likeminds-Authentication/Dockerfile.kettle-load ./Likeminds-Authentication/'
+                        echo 'Kettle Image Creation done'
+
+                        // Push the Docker image to Azure Container Registry
+                        sh 'docker push ${ACR_LOGIN_SERVER}/LikeMinds-Authentication/kettle:${env.BUILD_NUMBER}'
+                        echo 'Kettle Image Pushed to ACR'
 
                         // sh 'gcloud auth configure-docker asia.gcr.io'
                         // docker.build("kettle:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/Dockerfile.kettle-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-authentication/kettle:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-authentication/")

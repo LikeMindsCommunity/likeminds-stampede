@@ -43,9 +43,9 @@ resource "azurerm_linux_virtual_machine" "jenkins_vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
+    offer     = "0001-com-ubuntu-server-focal-daily"
+    sku       = "20_04-daily-lts-gen2"
+    version   = "20.04.202406280"
   }
 
   custom_data = base64encode(file(local.jenkins_init_script_path))
