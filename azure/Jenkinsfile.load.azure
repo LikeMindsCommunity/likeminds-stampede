@@ -34,16 +34,18 @@ pipeline {
         stage("Azure login & kubectl context set") {
             steps {
                 script {
-                    withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
-                        sh '''
-                            az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
-                            az account set --subscription $AZURE_SUBSCRIPTION_ID
-                            export KUBECONFIG=~/.kube/config
-                            az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing
-                            kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
-                            kubectl get namespaces
-                        '''
-                        echo 'Completed: Azure login done & kubectl context set'
+                    dir($env.WORKSPACE_DIR) {
+                        withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
+                            sh '''
+                                az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
+                                az account set --subscription $AZURE_SUBSCRIPTION_ID
+                                export KUBECONFIG=~/.kube/config
+                                az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing
+                                kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
+                                kubectl get namespaces
+                            '''
+                            echo 'Completed: Azure login done & kubectl context set'
+                        }
                     }
                 }
             }
@@ -52,7 +54,7 @@ pipeline {
         stage("Build Kettle Docker Image") {
             when {
                 expression {
-                    return params.enable_kettle && params.action == 'apply'
+                    return params.enable_kettle
                 }
             }
             steps {
@@ -179,6 +181,7 @@ pipeline {
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
+                        sh 'echo $KUBECONFIG'
                         sh 'terraform plan'
                     }
                 }
