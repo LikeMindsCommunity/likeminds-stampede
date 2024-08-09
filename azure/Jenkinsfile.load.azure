@@ -65,7 +65,7 @@ pipeline {
                         echo 'Kettle code cloned'
 
                         // Login to Azure Container Registry
-                        sh 'az acr login --name ${env.ACR_NAME}'
+                        sh "az acr login --name ${env.ACR_NAME}"
 
                         // Build the Docker image using docker.build
                         def image = docker.build("${env.ACR_LOGIN_SERVER}/LikeMinds-Authentication/kettle:${env.BUILD_NUMBER}", "-f ./Likeminds-Authentication/Dockerfile.kettle-load ./Likeminds-Authentication/")
