@@ -61,7 +61,7 @@ pipeline {
                 echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${params.kettle_branch}", credentialsId: 'ssh-key', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
+                        git branch: "${params.kettle_branch}", credentialsId: 'github-ssh-shubh	', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
                         echo 'Kettle code cloned'
 
                         // Login to Azure Container Registry
