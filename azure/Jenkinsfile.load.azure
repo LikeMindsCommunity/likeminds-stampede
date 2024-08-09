@@ -34,7 +34,7 @@ pipeline {
         stage("Azure login & kubectl context set") {
             steps {
                 script {
-                    dir($env.WORKSPACE_DIR) {
+                    dir("${env.WORKSPACE_DIR}"){
                         withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
                             sh '''
                                 az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
