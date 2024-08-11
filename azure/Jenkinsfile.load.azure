@@ -26,6 +26,7 @@ pipeline {
     }
 
     stages {
+        
         stage("----------------------Checkout----------------------") {
             steps {
                 checkout scm
@@ -77,7 +78,7 @@ pipeline {
                 echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${params.kettle_branch}", credentialsId: 'github-ssh-shubh	', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
+                        git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
                         echo 'Kettle code cloned'
 
                         // Step to download .env file and add it to the project
@@ -93,7 +94,7 @@ pipeline {
                         sh "docker push ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}"
                         echo 'Kettle Image Pushed to ACR'
 
-                        // Optional: Clean up the local Docker image using sh
+                        // Clean up the local Docker image using sh
                         sh "docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}"
                         echo 'Kettle Image Cleaned up'
                     }
@@ -101,7 +102,7 @@ pipeline {
             }
         }
 
-        stage("Build Swarm Docker Image") {
+        stage("----------------------Build Swarm Docker Image----------------------") {
             when {
                 expression {
                     return params.enable_swarm
@@ -128,7 +129,7 @@ pipeline {
             }
         }
 
-        stage("Build Caravan Docker Image") {
+        stage("----------------------Build Caravan Docker Image----------------------") {
             when {
                 expression {
                     return params.enable_caravan
@@ -155,7 +156,7 @@ pipeline {
             }
         }
 
-        stage("Build Caravan Celery Docker Image") {
+        stage("----------------------Build Caravan Celery Docker Image----------------------") {
             when {
                 expression {
                     return params.enable_caravan
