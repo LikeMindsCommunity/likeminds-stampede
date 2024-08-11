@@ -43,6 +43,8 @@ pipeline {
 
                         env.KUBECONFIG = "${env.KUBECONFIG_LOCATION}"
                     }
+
+                    echo "Enviornment variables set successfully"
                 }
             }
         }
@@ -55,11 +57,11 @@ pipeline {
                             az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --t $ARM_TENANT_ID
 
                             az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing --file $KUBECONFIG
+
                             kubelogin convert-kubeconfig -l spn --client-id $ARM_CLIENT_ID --client-secret $ARM_CLIENT_SECRET
-                            
-                            kubectl get namespaces
                         '''
-                        echo 'Completed: Azure login done & kubectl context set'
+
+                        echo "Azure login & kubelogin converstion successfully"
                     }
                 }
             }
@@ -187,6 +189,7 @@ pipeline {
                         sh '''
                             terraform init
                         '''
+                        echo "Terraform initialization successfully done"
                     }
                 }
             }
@@ -197,6 +200,8 @@ pipeline {
                 script{
                     dir("${env.WORKSPACE_DIR}"){
                         sh 'terraform plan'
+
+                        echo "Terraform plan successfully done"
                     }
                 }
             }
