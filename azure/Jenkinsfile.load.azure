@@ -43,8 +43,8 @@ pipeline {
                 script {
                     withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
                         env.ARM_CLIENT_ID = '$AZURE_CLIENT_ID'
-                        env.ARM_CLIENT_SECRET = "$AZURE_CLIENT_SECRET"
-                        env.ARM_SUBSCRIPTION_ID = '$AZURE_SUBSCRIPTION_ID'
+                        env.ARM_CLIENT_SECRET = "${AZURE_CLIENT_SECRET}"
+                        env.ARM_SUBSCRIPTION_ID = "${env.AZURE_SUBSCRIPTION_ID}"
                         env.ARM_TENANT_ID = "$AZURE_TENANT_ID"
 
                         env.KUBECONFIG = "WOW"
