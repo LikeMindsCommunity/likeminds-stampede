@@ -69,6 +69,26 @@ pipeline {
             }
         }
 
+        stage('Infisical Login and Init') {
+            steps {
+                script {
+                    // Use Infisical credentials
+                    withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                        dir('likeminds-authentication') {
+                            // infisical login --method=universal-auth --client-id=<client-id> --client-secret=<client-secret>
+                            // infisical init --project kettle --env load
+                            echo $INFISICAL_CLIENT_ID
+                            echo $INFISICAL_CLIENT_SECRET
+                            sh '''
+                                export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET)
+                                echo $INFISICAL_TOKEN
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
         stage("----------------------Build Kettle Docker Image----------------------") {
             when {
                 expression {
@@ -79,10 +99,16 @@ pipeline {
                 echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/LikeMinds-Authentication.git'
+                        git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
                         echo 'Kettle code cloned'
 
-                        // Step to download .env file and add it to the project
+                        // Use infisical to export secrets to .env file
+                        sh '''
+                            infisical init --project kettle --env load
+                            infisical export > .env
+                            cat .env
+                        '''
+                        echo 'Infisical secrets exported to .env file'
 
                         // Login to Azure Container Registry
                         sh "az acr login --name ${env.ACR_NAME}"
