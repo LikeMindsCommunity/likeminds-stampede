@@ -236,12 +236,12 @@ pipeline {
         }
 
         stage("----------------------Terraform plan----------------------"){
-            steps{
-                when {
+            when {
                     expression {
                         return params.action == 'plan'
                     }
                 }
+            steps{
                 script{
                     dir("WORKSPACE_DIR}"){
                         sh 'terraform plan'
