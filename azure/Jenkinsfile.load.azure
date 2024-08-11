@@ -100,7 +100,7 @@ pipeline {
         stage("----------------------Build Kettle Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_kettle // && params.action == 'apply'
+                    return params.enable_kettle && params.action == 'apply'
                 }
             }
             steps {
@@ -137,7 +137,7 @@ pipeline {
         stage("----------------------Build Swarm Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_swarm // && params.action == 'apply'
+                    return params.enable_swarm && params.action == 'apply'
                 }
             }
             steps {
@@ -175,7 +175,7 @@ pipeline {
         stage("----------------------Build Caravan Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_caravan // && params.action == 'apply'
+                    return params.enable_caravan && params.action == 'apply'
                 }
             }
             steps {
@@ -216,7 +216,7 @@ pipeline {
         stage("----------------------Build Caravan Celery Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_caravan // && params.action == 'apply'
+                    return params.enable_caravan && params.action == 'apply'
                 }
             }
             steps {
@@ -250,41 +250,7 @@ pipeline {
             }
         }
 
-        stage("----------------------Terraform init----------------------"){
-            steps{
-                script{
-                    dir("${env.WORKSPACE_DIR}"){
-                        sh '''
-                            terraform init
-                        '''
-                    }
-                    echo "----------------------Terraform initialization successfully done----------------------"
-                }
-            }
-        }
-
-        stage("----------------------Terraform plan----------------------"){
-            when {
-                    expression {
-                        return params.action == 'plan'
-                    }
-                }
-            steps{
-                script{
-                    dir("${env.WORKSPACE_DIR}"){
-                        sh 'terraform plan'
-                    }
-                    echo "----------------------Terraform plan successfully done----------------------"
-                }
-            }
-        }
-
         stage("----------------------Terraform action----------------------"){
-            when {
-                expression {
-                    return params.action == 'apply' || params.action == 'destroy'
-                }
-            }
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
@@ -317,10 +283,24 @@ pipeline {
                         if (env.skulk_cpu.trim()) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
                         if (env.skulk_memory.trim()) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
                         if (env.skulk_pods.trim()) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
-                        
-                        sh """
-                            terraform ${params.action} --auto-approve ${terraformVars}
-                        """
+
+                        // Enable parameters
+                        if (params.enable_kettle.trim()) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
+                        if (params.enable_swarm.trim()) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
+                        if (params.enable_caravan.trim()) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
+                        if (params.enable_skulk.trim()) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
+
+                        if (params.action == 'plan') {
+                            sh """
+                                terraform init
+                                terraform ${params.action} ${terraformVars}
+                            """
+                        } else {
+                            sh """
+                                terraform init
+                                terraform ${params.action} --auto-approve ${terraformVars}
+                            """
+                        }
                     }
                 }
 
