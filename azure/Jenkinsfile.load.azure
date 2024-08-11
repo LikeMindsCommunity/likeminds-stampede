@@ -37,11 +37,18 @@ pipeline {
                     dir("${env.WORKSPACE_DIR}"){
                         withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
                             sh '''
+                                export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                                export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                                export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                                export ARM_TENANT_ID=$AZURE_TENANT_ID
+
                                 az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
                                 az account set --subscription $AZURE_SUBSCRIPTION_ID
+
                                 export KUBECONFIG=kubeconfig
                                 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing --file $KUBECONFIG
                                 kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
+                                
                                 kubectl get namespaces
                             '''
                             echo 'Completed: Azure login done & kubectl context set'

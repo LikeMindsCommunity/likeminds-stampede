@@ -56,3 +56,7 @@ runcmd:
 
   # Install Azure Kubernetes Service CLI
   - az aks install-cli
+
+  # Add user jenkins to docker group
+  - usermod -aG docker jenkins
+  - systemctl restart jenkins
