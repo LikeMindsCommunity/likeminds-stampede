@@ -30,6 +30,7 @@ pipeline {
         stage("----------------------Checkout----------------------") {
             steps {
                 checkout scm
+                echo "----------------------Checkout Main Branch stage completed----------------------"
             }
         }
 
@@ -45,8 +46,8 @@ pipeline {
                         env.KUBECONFIG = "${env.KUBECONFIG_LOCATION}"
                     }
 
-                    echo "Enviornment variables set successfully"
                 }
+                echo "----------------------Set Azure Enviornment variables stage completed----------------------"
             }
         }
 
@@ -62,8 +63,8 @@ pipeline {
                             kubelogin convert-kubeconfig -l spn --client-id $ARM_CLIENT_ID --client-secret $ARM_CLIENT_SECRET
                         '''
 
-                        echo "Azure login & kubelogin converstion successfully"
                     }
+                    echo "----------------------Azure login & kubelogin stage completed----------------------"
                 }
             }
         }
@@ -98,6 +99,8 @@ pipeline {
                         sh "docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}"
                         echo 'Kettle Image Cleaned up'
                     }
+
+                echo '----------------------Kettle Docker Image Stage completed----------------------'
                 }  
             }
         }
