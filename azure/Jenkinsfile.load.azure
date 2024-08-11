@@ -180,6 +180,7 @@ pipeline {
                                 export ARM_TENANT_ID=$AZURE_TENANT_ID
                                 terraform init
                             '''
+                        }
                     }
                 }
             }
