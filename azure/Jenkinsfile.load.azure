@@ -84,6 +84,7 @@ pipeline {
                                 export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                             '''
                         }
+                        echo "----------------------Infisical Login and Init stage completed----------------------"
                     }
                 }
             }
@@ -104,9 +105,8 @@ pipeline {
 
                         // Use infisical to export secrets to .env file
                         sh '''
-                            echo $INFISICAL_TOKEN
-                            infisical init --project kettle --env load
-                            infisical export > .env
+                            infisical init 
+                            infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env
                             cat .env
                         '''
                         echo 'Infisical secrets exported to .env file'
