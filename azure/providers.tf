@@ -9,6 +9,13 @@ terraform {
             version = "=2.31.0"
         }
     }
+
+    backend "azurerm" {
+        resource_group_name   = "likeminds-load-resource-group"
+        storage_account_name  = "likemindsload"
+        container_name        = "likeminds-load-terraform-state"
+        key                   = "terraform.tfstate"
+    }
 }
 
 provider "azurerm" {
@@ -16,9 +23,5 @@ provider "azurerm" {
 }
 
 provider "kubernetes" {
-    config_path = "~/.kube/config"
-#   host                   = data.azurerm_kubernetes_cluster.aks.kube_config[0].host
-#   client_certificate     = base64decode(data.azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
-#   client_key             = base64decode(data.azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
-#   cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+    config_path = "kubeconfig" // Path to the kubeconfig file, to be stored in the current directory
 }

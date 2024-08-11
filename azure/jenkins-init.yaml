@@ -1,9 +1,62 @@
 #cloud-config
 package_update: true
 packages:
+  - openjdk-17-jdk
+  - git
   - docker.io
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - curl
+  - software-properties-common
+  - nano
 
 runcmd:
-  - systemctl start docker
-  - systemctl enable docker
-  - docker run -d --name jenkins -p 80:8080 -p 50000:50000 -v jenkins_data:/var/jenkins_home jenkins/jenkins:lts
+
+  # Update and upgrade packages
+  - apt-get update
+  - apt-get upgrade -y
+
+  # Upgrade init-system-helpers
+  - wget http://ftp.kr.debian.org/debian/pool/main/i/init-system-helpers/init-system-helpers_1.60_all.deb
+  - apt install ./init-system-helpers_1.60_all.deb
+
+  # Add Jenkins 
+  - wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+  - sh -c 'echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null'
+  - apt-get update
+  - apt-get install -y jenkins
+
+  # Start and enable Jenkins service
+  - systemctl start jenkins
+  - systemctl enable jenkins
+
+  # Enable IP forwarding
+  - sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
+  - sh -c 'echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf'
+  - sysctl -p
+
+  # Redirect all port 80 requests to Jenkins on port 8080
+  - apt-get install -y iptables
+  - iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+  - mkdir -p /etc/iptables
+  - sh -c 'iptables-save > /etc/iptables/rules.v4'
+
+  # Install Terraform
+  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+  - apt update && sudo apt install terraform
+ 
+  # Install kubectl
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+  # Install Azure CLI
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+  # Install Azure Kubernetes Service CLI
+  - az aks install-cli
+
+  # Add user jenkins to docker group
+  - usermod -aG docker jenkins
+  - systemctl restart jenkins
