@@ -107,8 +107,8 @@ pipeline {
                         // Use infisical to export secrets to .env file
                         sh '''
                             echo $INFISICAL_TOKEN
-                            infisical init 
-                            infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env
+                            infisical init --token=$INFISICAL_TOKEN
+                            infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env --token=$INFISICAL_TOKEN
                             cat .env
                         '''
                         echo 'Infisical secrets exported to .env file'
