@@ -8,6 +8,12 @@ pipeline {
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
         ACR_NAME = 'likemindsloadregistry'
         ACR_LOGIN_SERVER = 'likemindsloadregistry.azurecr.io'
+
+        // Azure Service Principal
+        ARM_CLIENT_ID = credentials('azure-load-sp-creds').AZURE_CLIENT_ID
+        ARM_CLIENT_SECRET = credentials('azure-load-sp-creds').AZURE_CLIENT_SECRET
+        ARM_SUBSCRIPTION_ID = credentials('azure-load-sp-creds').AZURE_SUBSCRIPTION_ID
+        ARM_TENANT_ID = credentials('azure-load-sp-creds').AZURE_TENANT_ID
     }
 
     parameters {
@@ -56,7 +62,7 @@ pipeline {
         stage("Build Kettle Docker Image") {
             when {
                 expression {
-                    return params.enable_kettle
+                    return params.enable_kettle // && params.action == 'apply'
                 }
             }
             steps {
@@ -178,6 +184,7 @@ pipeline {
                                 export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
                                 export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
                                 export ARM_TENANT_ID=$AZURE_TENANT_ID
+
                                 terraform init
                             '''
                         }
