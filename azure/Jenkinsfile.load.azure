@@ -75,11 +75,11 @@ pipeline {
                     // Use Infisical credentials
                     withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                         dir('likeminds-authentication') {
-                            // infisical login --method=universal-auth --client-id=<client-id> --client-secret=<client-secret>
                             // infisical init --project kettle --env load
                             echo "clientId; $INFISICAL_CLIENT_ID"
                             echo "secret: $INFISICAL_CLIENT_SECRET"
                             sh '''
+                                infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET)
                                 export INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET)
                                 echo $INFISICAL_TOKEN
                             '''
