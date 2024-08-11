@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         WORKSPACE_DIR = 'azure'
+        KUBECONFIG_LOCATION = 'kubeconfig'
 
         RESOURCE_GROUP = 'likeminds-load-resource-group'
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
@@ -10,10 +11,10 @@ pipeline {
         ACR_LOGIN_SERVER = 'likemindsloadregistry.azurecr.io'
 
         // Azure Service Principal
-        ARM_CLIENT_ID = credentials('azure-load-sp-creds').AZURE_CLIENT_ID
-        ARM_CLIENT_SECRET = credentials('azure-load-sp-creds').AZURE_CLIENT_SECRET
-        ARM_SUBSCRIPTION_ID = credentials('azure-load-sp-creds').AZURE_SUBSCRIPTION_ID
-        ARM_TENANT_ID = credentials('azure-load-sp-creds').AZURE_TENANT_ID
+        ARM_CLIENT_ID = ''
+        ARM_CLIENT_SECRET = ''
+        ARM_SUBSCRIPTION_ID = ''
+        ARM_TENANT_ID = ''
     }
 
     parameters {
@@ -37,23 +38,37 @@ pipeline {
             }
         }
 
+        stage("Set Azure Environment Variables") {
+            steps {
+                script {
+                    withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
+                        env.ARM_CLIENT_ID = "${env.AZURE_CLIENT_ID}"
+                        env.ARM_CLIENT_SECRET = "${env.AZURE_CLIENT_SECRET}"
+                        env.ARM_SUBSCRIPTION_ID = "${env.AZURE_SUBSCRIPTION_ID}"
+                        env.ARM_TENANT_ID = "${env.AZURE_TENANT_ID}"
+                        env.KUBECONFIG = "${env.KUBECONFIG_LOCATION}"
+
+                        echo 'Completed: Azure Environment Variables set'
+                    }
+                }
+            }
+        }
+
         stage("Azure login & kubectl context set") {
             steps {
                 script {
                     dir("${env.WORKSPACE_DIR}"){
-                        withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
-                            sh '''
-                                az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --t $AZURE_TENANT_ID
-                                az account set --subscription $AZURE_SUBSCRIPTION_ID
+                        //  az account set --subscription $ARM_SUBSCRIPTION_ID
+                        // export KUBECONFIG=kubeconfig
+                        sh '''
+                            az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --t $ARM_TENANT_ID
 
-                                export KUBECONFIG=kubeconfig
-                                az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing --file $KUBECONFIG
-                                kubelogin convert-kubeconfig -l spn --client-id $AZURE_CLIENT_ID --client-secret $AZURE_CLIENT_SECRET
-                                
-                                kubectl get namespaces
-                            '''
-                            echo 'Completed: Azure login done & kubectl context set'
-                        }
+                            az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER --overwrite-existing --file $KUBECONFIG
+                            kubelogin convert-kubeconfig -l spn --client-id $ARM_CLIENT_ID --client-secret $ARM_CLIENT_SECRET
+                            
+                            kubectl get namespaces
+                        '''
+                        echo 'Completed: Azure login done & kubectl context set'
                     }
                 }
             }
@@ -178,16 +193,12 @@ pipeline {
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
-                        withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
-                            sh '''
-                                export ARM_CLIENT_ID=$AZURE_CLIENT_ID
-                                export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
-                                export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
-                                export ARM_TENANT_ID=$AZURE_TENANT_ID
+                        sh '''
+                            echo $ARM_CLIENT_ID
+                            echo $KUBECONFIG
 
-                                terraform init
-                            '''
-                        }
+                            terraform init
+                        '''
                     }
                 }
             }
