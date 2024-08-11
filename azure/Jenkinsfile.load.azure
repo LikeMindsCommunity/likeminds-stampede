@@ -288,41 +288,42 @@ pipeline {
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
+                    
+                        def terraformVars = ""
+
+                        // Terraform variables for the action if not empty
+                        if (env.resource_group_name.trim()) terraformVars += "-var 'resource_group_name=${env.resource_group_name}' "
+                        if (env.resource_location.trim()) terraformVars += "-var 'resource_location=${env.resource_location}' "
+                        if (env.aks_cluster_name.trim()) terraformVars += "-var 'aks_cluster_name=${env.aks_cluster_name}' "
+                        if (env.namespace_name.trim()) terraformVars += "-var 'namespace_name=${env.namespace_name}' "
+                        if (env.kettle_cpu.trim()) terraformVars += "-var 'kettle_cpu=${env.kettle_cpu}' "
+                        if (env.kettle_memory.trim()) terraformVars += "-var 'kettle_memory=${env.kettle_memory}' "
+                        if (env.kettle_pods.trim()) terraformVars += "-var 'kettle_pods=${env.kettle_pods}' "
+                        if (env.swarm_cpu.trim()) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
+                        if (env.swarm_memory.trim()) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
+                        if (env.swarm_pods.trim()) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
+                        if (env.swarm_worker_cpu.trim()) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
+                        if (env.swarm_worker_memory.trim()) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
+                        if (env.swarm_worker_pods.trim()) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
+                        if (env.caravan_cpu.trim()) terraformVars += "-var 'caravan_cpu=${env.caravan_cpu}' "
+                        if (env.caravan_memory.trim()) terraformVars += "-var 'caravan_memory=${env.caravan_memory}' "
+                        if (env.caravan_pods.trim()) terraformVars += "-var 'caravan_pods=${env.caravan_pods}' "
+                        if (env.caravan_celery_cpu.trim()) terraformVars += "-var 'caravan_celery_cpu=${env.caravan_celery_cpu}' "
+                        if (env.caravan_celery_memory.trim()) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
+                        if (env.caravan_celery_pods.trim()) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
+                        if (env.caravan_celery_broker_url.trim()) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
+                        if (env.caravan_rabbitmq_username.trim()) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
+                        if (env.caravan_rabbitmq_password.trim()) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
+                        if (env.skulk_cpu.trim()) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
+                        if (env.skulk_memory.trim()) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
+                        if (env.skulk_pods.trim()) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
+                        
                         sh """
-                            terraform ${action} --auto-approve \
-                            -var 'resource_group_name=${resource_group_name}' \
-                            -var 'resource_location=${resource_location}' \
-                            -var 'resource_location=${resource_location}' \
-                            -var 'aks_cluster_name=${aks_cluster_name}' \
-                            -var 'namespace_name=${namespace_name}' \
-                            -var 'enable_kettle=${params.enable_kettle}' \
-                            -var 'kettle_cpu=${kettle_cpu}' \
-                            -var 'kettle_memory=${kettle_memory}' \
-                            -var 'kettle_pods=${kettle_pods}' \
-                            -var 'enable_swarm=${params.enable_swarm}' \
-                            -var 'swarm_cpu=${swarm_cpu}' \
-                            -var 'swarm_memory=${swarm_memory}' \
-                            -var 'swarm_pods=${swarm_pods}' \
-                            -var 'swarm_worker_cpu=${swarm_worker_cpu}' \
-                            -var 'swarm_worker_memory=${swarm_worker_memory}' \
-                            -var 'swarm_worker_pods=${swarm_worker_pods}' \
-                            -var 'enable_caravan=${params.enable_caravan}' \
-                            -var 'caravan_cpu=${caravan_cpu}' \
-                            -var 'caravan_memory=${caravan_memory}' \
-                            -var 'caravan_pods=${caravan_pods}' \
-                            -var 'caravan_celery_cpu=${caravan_celery_cpu}' \
-                            -var 'caravan_celery_memory=${caravan_celery_memory}' \
-                            -var 'caravan_celery_pods=${caravan_celery_pods}' \
-                            -var 'caravan_celery_broker_url=${caravan_celery_broker_url}' \
-                            -var 'caravan_rabbitmq_username=${caravan_rabbitmq_username}' \
-                            -var 'caravan_rabbitmq_password=${caravan_rabbitmq_password}' \
-                            -var 'enable_skulk=${params.enable_skulk}' \
-                            -var 'skulk_cpu=${skulk_cpu}' \
-                            -var 'skulk_memory=${skulk_memory}' \
-                            -var 'skulk_pods=${skulk_pods}' \
+                            terraform ${params.action} --auto-approve ${terraformVars}
                         """
                     }
                 }
+
             }
         }
     }
