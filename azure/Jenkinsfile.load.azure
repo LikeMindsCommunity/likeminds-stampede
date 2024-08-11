@@ -92,10 +92,10 @@ pipeline {
 
                         // Build and push the Docker image 
                         sh '''
-                            az acr login --name ${env.ACR_NAME}
-                            docker build -t ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER} -f Dockerfile.kettle-load .
-                            docker push ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}
-                            docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}
+                            az acr login --name $ACR_NAME
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER -f Dockerfile.kettle-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
                         '''
                     }
 
