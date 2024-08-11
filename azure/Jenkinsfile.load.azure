@@ -82,14 +82,14 @@ pipeline {
                         git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
                         echo 'Kettle code cloned'
 
-                        echo "----------------------Infisical Login and Init step ----------------------"
+                        echo "----------------------Infisical Login and .ENV exports step----------------------"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                                 infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env --token=$INFISICAL_TOKEN
                             '''
                         }
-                        echo 'Infisical secrets exported to .env file'
+                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
 
                         // Login to Azure Container Registry
                         sh "az acr login --name ${env.ACR_NAME}"
