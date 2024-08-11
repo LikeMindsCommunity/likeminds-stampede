@@ -76,7 +76,6 @@ pipeline {
                 }
             }
             steps {
-                echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
                         git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
@@ -91,20 +90,13 @@ pipeline {
                         }
                         echo '----------------------Infisical Login and .ENV exports step completed----------------------'
 
-                        // Login to Azure Container Registry
-                        sh "az acr login --name ${env.ACR_NAME}"
-
-                        // Build the Docker image using sh
-                        sh "docker build -t ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER} -f Dockerfile.kettle-load ."
-                        echo 'Kettle Image Creation done'
-
-                        // Push the Docker image to Azure Container Registry using sh
-                        sh "docker push ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}"
-                        echo 'Kettle Image Pushed to ACR'
-
-                        // Clean up the local Docker image using sh
-                        sh "docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}"
-                        echo 'Kettle Image Cleaned up'
+                        // Build and push the Docker image 
+                        sh '''
+                            az acr login --name ${env.ACR_NAME}
+                            docker build -t ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER} -f Dockerfile.kettle-load .
+                            docker push ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}
+                            docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-authentication/kettle:${env.BUILD_NUMBER}
+                        '''
                     }
 
                 echo '----------------------Kettle Docker Image Stage completed----------------------'
@@ -115,26 +107,35 @@ pipeline {
         stage("----------------------Build Swarm Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_swarm
-                }
-                expression {
-                    return params.action == 'apply'
+                    return params.enable_swarm // && params.action == 'apply'
                 }
             }
             steps {
-                echo 'Swarm Selected'
                 script {
                     dir('likeminds-swarm') {
-                        git branch: "${swarm_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/LikeMinds-Swarm/'
-                        sh 'echo "Swarm code cloned"'
+                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
+                        echo 'swarm code cloned'
 
-                        sh 'gcloud auth configure-docker asia.gcr.io'
-                        docker.build("swarm:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-swarm/Dockerfile.swarm-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-swarm/swarm:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-swarm/")
-                        sh 'echo "Swarm Image Creation done"'
+                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83  > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
+                                cat ./cmd/server/config/.env
+                            '''
+                        }
+                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
 
-                        sh 'docker push asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-swarm/swarm:${BUILD_NUMBER}'
-                        sh 'echo "Swarm Image Pushed to GCP"'
+                        // Build and push the Docker image 
+                        sh '''
+                            az acr login --name ${env.ACR_NAME}
+                            docker build -t ${env.ACR_LOGIN_SERVER}/likeminds-swarm/swarm:${env.BUILD_NUMBER} -f Dockerfile.swarm-load .
+                            docker push ${env.ACR_LOGIN_SERVER}/likeminds-swarm/swarm:${env.BUILD_NUMBER}
+                            docker rmi ${env.ACR_LOGIN_SERVER}/likeminds-swarm/swarm:${env.BUILD_NUMBER}
+                        '''
                     }
+
+                echo '----------------------Swarm Docker Image Stage completed----------------------'
                 }  
             }
         }
@@ -142,26 +143,38 @@ pipeline {
         stage("----------------------Build Caravan Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_caravan
-                }
-                expression {
-                    return params.action == 'apply'
+                    return params.enable_caravan // && params.action == 'apply'
                 }
             }
             steps {
-                echo 'Caravan Selected'
                 script {
                     dir('likeminds-caravan') {
-                        git branch: "${caravan_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/Togther/'
-                        sh 'echo "Caravan code cloned"'
+                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        echo 'Caravan code cloned'
 
-                        sh 'gcloud auth configure-docker asia.gcr.io'
-                        docker.build("caravan:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-caravan/Dockerfile.caravan-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-caravan/caravan:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-caravan/")
-                        sh 'echo "Caravan Image Creation done"'
+                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=cc310d9a-779b-4218-8e25-3fb6c152ecbb  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+                                cat ./project/project/settings/.env
+                            '''
+                        }
+                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
 
-                        sh 'docker push asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-caravan/caravan:${BUILD_NUMBER}'
-                        sh 'echo "Caravan Image Pushed to GCP"'
+
+                        // Build and push the Docker image 
+                        sh '''
+                            az acr login --name ${env.ACR_NAME}
+                            docker build -t ${env.ACR_LOGIN_SERVER}/togther/caravan:${env.BUILD_NUMBER} -f Dockerfile.caravan-load .
+                            docker push ${env.ACR_LOGIN_SERVER}/togther/caravan:${env.BUILD_NUMBER}
+                            docker rmi ${env.ACR_LOGIN_SERVER}/togther/caravan:${env.BUILD_NUMBER}
+                        '''
+
+                        // Add Run Migrations Step
                     }
+
+                    echo '----------------------Caravan Docker Image Stage completed----------------------'
                 }
             }
         }
@@ -169,26 +182,34 @@ pipeline {
         stage("----------------------Build Caravan Celery Docker Image----------------------") {
             when {
                 expression {
-                    return params.enable_caravan
-                }
-                expression {
-                    return params.action == 'apply'
+                    return params.enable_caravan // && params.action == 'apply'
                 }
             }
             steps {
-                echo 'Caravan Celery Selected'
                 script {
                     dir('likeminds-caravan-celery') {
-                        git branch: "${caravan_celery_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/Togther/'
-                        sh 'echo "Caravan Celery code cloned"'
+                        git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        echo 'Caravan-Celery code cloned'
 
-                        sh 'gcloud auth configure-docker asia.gcr.io'
-                        docker.build("caravan-celery:${env.BUILD_NUMBER}", "-f /var/lib/jenkins/workspace/likeminds-stampede/likeminds-caravan-celery/Dockerfile.caravan-celery-load -t asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-caravan-celery/caravan-celery:${BUILD_NUMBER} /var/lib/jenkins/workspace/likeminds-stampede/likeminds-caravan-celery/")
-                        sh 'echo "Caravan Celery Image Creation done"'
+                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+                            '''
+                        }
+                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
 
-                        sh 'docker push asia.gcr.io/likeminds-nonprod-prj-24e1/github.com/nateshr/likeminds-stampede/likeminds-caravan-celery/caravan-celery:${BUILD_NUMBER}'
-                        sh 'echo "Caravan Celery Image Pushed to GCP"'
+                        // Build and push the Docker image 
+                        sh '''
+                            az acr login --name ${env.ACR_NAME}
+                            docker build -t ${env.ACR_LOGIN_SERVER}/togther/caravan-celery:${env.BUILD_NUMBER} -f Dockerfile.caravan-celery-load .
+                            docker push ${env.ACR_LOGIN_SERVER}/togther/caravan-celery:${env.BUILD_NUMBER}
+                            docker rmi ${env.ACR_LOGIN_SERVER}/togther/caravan-celery:${env.BUILD_NUMBER}
+                        '''
                     }
+
+                    echo '----------------------Caravan-Celery Docker Image Stage completed----------------------'
                 }
             }
         }
@@ -200,20 +221,24 @@ pipeline {
                         sh '''
                             terraform init
                         '''
-                        echo "Terraform initialization successfully done"
                     }
+                    echo "----------------------Terraform initialization successfully done----------------------"
                 }
             }
         }
 
         stage("----------------------Terraform plan----------------------"){
             steps{
+                when {
+                    expression {
+                        return params.action == 'plan'
+                    }
+                }
                 script{
                     dir("${env.WORKSPACE_DIR}"){
                         sh 'terraform plan'
-
-                        echo "Terraform plan successfully done"
                     }
+                    echo "----------------------Terraform plan successfully done----------------------"
                 }
             }
         }
