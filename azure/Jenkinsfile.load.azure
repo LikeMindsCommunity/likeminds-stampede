@@ -323,7 +323,7 @@ pipeline {
 
 // Helper function to check if a variable is not null and not empty
 def isNotEmpty(value){ 
-    val = (myString?.trim())
+    val = (value?.trim())
 
     echo "Value : ${value} | isNotEmpty : ${val}"
 
