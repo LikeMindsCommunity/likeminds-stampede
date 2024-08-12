@@ -285,9 +285,15 @@ pipeline {
                         if (isNotEmpty(env.caravan_celery_memory)) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
                         if (isNotEmpty(env.caravan_celery_pods)) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
                         if (isNotEmpty(env.caravan_celery_broker_url)) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
-                        if (isNotEmpty(env.caravan_rabbitmq_username)) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
+                        if (isNotEmpty(env.caravan_rabbitmq_username)){
+                            terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
+                            echo "RabbitMQ Username: ${env.caravan_rabbitmq_username}"
+                        } 
                         if (isNotEmpty(env.caravan_rabbitmq_password)) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
-                        if (isNotEmpty(env.skulk_cpu)) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
+                        if (isNotEmpty(env.skulk_cpu)){
+                            terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
+                            echo "Skulk CPU: ${env.skulk_cpu}"
+                        } 
                         if (isNotEmpty(env.skulk_memory)) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
                         if (isNotEmpty(env.skulk_pods)) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
 
