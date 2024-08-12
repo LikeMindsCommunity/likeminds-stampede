@@ -121,7 +121,7 @@ variable "caravan_celery_app_name" {
 variable "caravan_celery_app_docker_image" {
   description = "The docker image of caravan celery app"
   type = string
-  default = "likemindsloadregistry.azurecr.io/togther/caravan-celery"
+  default = "likemindsloadregistry.azurecr.io/togther/caravan"
 }
 
 variable "caravan_celery_cpu" {
@@ -220,7 +220,7 @@ variable "swarm_worker_app_name" {
 variable "swarm_worker_app_docker_image" {
   description = "The Docker image for the Swarm worker app."
   type        = string
-  default     = "likemindsloadregistry.azurecr.io/likeminds-swarm/swarm-worker"
+  default     = "likemindsloadregistry.azurecr.io/likeminds-swarm/swarm"
 }
 
 variable "swarm_worker_cpu" {

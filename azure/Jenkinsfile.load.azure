@@ -10,34 +10,6 @@ pipeline {
 
         RESOURCE_GROUP = 'likeminds-load-resource-group'
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
-
-        // Variables for terraform action | To be passed in from Jenkins job
-        resource_group_name = ''
-        aks_cluster_name = ''
-        resource_location = ''
-        namespace_name = ''
-        kettle_cpu = ''
-        kettle_memory = ''
-        kettle_pods = ''
-        swarm_cpu = ''
-        swarm_memory = ''
-        swarm_pods = ''
-        swarm_worker_cpu = ''
-        swarm_worker_memory = ''
-        swarm_worker_pods = ''
-        caravan_cpu = ''
-        caravan_memory = ''
-        caravan_pods = ''
-        caravan_celery_cpu = ''
-        caravan_celery_memory = ''
-        caravan_celery_pods = ''
-        caravan_celery_broker_url = ''
-        caravan_rabbitmq_username = ''
-        caravan_rabbitmq_password = ''
-        skulk_cpu = ''
-        skulk_memory = ''
-        skulk_pods = ''
-
     }
 
     parameters {
@@ -46,23 +18,29 @@ pipeline {
         string(name: 'kettle_branch', defaultValue: 'development', description: 'Kettle branch')
         string(name: 'swarm_branch', defaultValue: 'development', description: 'Swarm branch')
         string(name: 'caravan_branch', defaultValue: 'development', description: 'Caravan branch')
-        string(name: 'caravan_celery_branch', defaultValue: 'development', description: 'Caravan Celery branch')
+        string(name: 'skulk_branch', defaultValue: 'development', description: 'Skulk Celery branch')
 
-        booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle')
-        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm')
-        booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan')
+        booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle for deployment')
+        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm for deployment')
+        booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan for deployment')
+        booleanParam(name: 'enable_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
+
+        booleanParam(name: 'build_kettle', defaultValue: false, description: 'Build Kettle & push Docker image')
+        booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
+        booleanParam(name: 'build_caravan', defaultValue: false, description: 'Build Caravan & push Docker image')
+        booleanParam(name: 'build_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
     }
 
     stages {
         
-        stage("----------------------Checkout----------------------") {
+        stage("Checkout") {
             steps {
                 checkout scm
-                echo "----------------------Checkout Main Branch stage completed----------------------"
+                echo "-------------------------Checkout Main Branch stage completed-------------------------"
             }
         }
 
-        stage("----------------------Set Azure Environment Variables----------------------") {
+        stage("Set Azure Environment Variables") {
             steps {
                 script {
                     withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
@@ -75,11 +53,11 @@ pipeline {
                     }
 
                 }
-                echo "----------------------Set Azure Enviornment variables stage completed----------------------"
+                echo "-------------------------Set Azure Enviornment variables stage completed-------------------------"
             }
         }
 
-        stage("----------------------Azure login & kubectl context set----------------------") {
+        stage("Azure login & kubectl context set") {
             steps {
                 script {
                     dir("${env.WORKSPACE_DIR}"){
@@ -92,15 +70,15 @@ pipeline {
                         '''
 
                     }
-                    echo "----------------------Azure login & kubelogin stage completed----------------------"
+                    echo "-------------------------Azure login & kubelogin stage completed-------------------------"
                 }
             }
         }
 
-        stage("----------------------Build Kettle Docker Image----------------------") {
+        stage("Build Kettle Docker Image") {
             when {
                 expression {
-                    return params.enable_kettle && params.action == 'apply'
+                    return params.build_kettle
                 }
             }
             steps {
@@ -109,35 +87,35 @@ pipeline {
                         git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
                         echo 'Kettle code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env --token=$INFISICAL_TOKEN
+                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f > .env --token=$INFISICAL_TOKEN
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
                         // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        echo "Build and push the Docker image"
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER -f Dockerfile.kettle-load .
-                            docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest -f Dockerfile.kettle-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
                     }
 
-                echo '----------------------Kettle Docker Image Stage completed----------------------'
+                echo '-------------------------Kettle Docker Image Stage completed-------------------------'
                 }  
             }
         }
 
-        stage("----------------------Build Swarm Docker Image----------------------") {
+        stage("Build Swarm Docker Image") {
             when {
                 expression {
-                    return params.enable_swarm && params.action == 'apply'
+                    return params.build_swarm
                 }
             }
             steps {
@@ -146,36 +124,36 @@ pipeline {
                         git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
                         echo 'swarm code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83  > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
-                                cat ./cmd/server/config/.env
+                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/.env --token=$INFISICAL_TOKEN
+                                cat ./cmd/server/.env
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
                         // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        echo "Build and push the Docker image"
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER -f Dockerfile.swarm-load .
-                            docker push ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest -f Dockerfile.swarm-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
                     }
 
-                echo '----------------------Swarm Docker Image Stage completed----------------------'
+                echo '-------------------------Swarm Docker Image Stage completed-------------------------'
                 }  
             }
         }
 
-        stage("----------------------Build Caravan Docker Image----------------------") {
+        stage("Build Caravan Docker Image") {
             when {
                 expression {
-                    return params.enable_caravan && params.action == 'apply'
+                    return params.build_caravan
                 }
             }
             steps {
@@ -184,73 +162,105 @@ pipeline {
                         git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
                         echo 'Caravan code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=cc310d9a-779b-4218-8e25-3fb6c152ecbb  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+                                infisical export --env=load --projectId=cc310d9a-779b-4218-8e25-3fb6c152ecbb > ./project/project/settings/.env --token=$INFISICAL_TOKEN
                                 cat ./project/project/settings/.env
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
 
                         // Build and push the Docker image
-                        echo "----------------------Build and push the Docker image----------------------" 
+                        echo "Build and push the Docker image" 
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER -f Dockerfile.caravan-load .
-                            docker push ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/togther/caravan:latest -f Dockerfile.caravan-load .
+                            docker push $ACR_LOGIN_SERVER/togther/caravan:latest
+                            docker rmi $ACR_LOGIN_SERVER/togther/caravan:latest
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
 
                         // Add Run Migrations Step
                     }
 
-                    echo '----------------------Caravan Docker Image Stage completed----------------------'
+                    echo '-------------------------Caravan Docker Image Stage completed-------------------------'
                 }
             }
         }
 
-        stage("----------------------Build Caravan Celery Docker Image----------------------") {
+        // stage("Build Caravan Celery Docker Image") {
+        //     when {
+        //         expression {
+        //             return params.build_caravan
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             dir('likeminds-caravan-celery') {
+        //                 git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+        //                 echo 'Caravan-Celery code cloned'
+
+        //                 echo "Infisical Login and .ENV exports step"
+        //                 withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+        //                     sh '''
+        //                         INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+        //                         infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+        //                     '''
+        //                 }
+        //                 echo 'Infisical Login and .ENV exports step completed'
+
+        //                 // Build and push the Docker image 
+        //                 echo "Build and push the Docker image"
+        //                 sh '''
+        //                     az acr login --name $ACR_NAME
+        //                     docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:latest -f Dockerfile.caravan-celery-load .
+        //                     docker push $ACR_LOGIN_SERVER/togther/caravan-celery:latest
+        //                     docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
+        //                 '''
+        //                 echo "Build and push the Docker image Completed"
+        //             }
+
+        //             echo '-------------------------Caravan-Celery Docker Image Stage completed-------------------------'
+        //         }
+        //     }
+        // }
+
+        stage("Build Skulk Docker Image") {
             when {
                 expression {
-                    return params.enable_caravan && params.action == 'apply'
+                    return params.build_skulk
                 }
             }
             steps {
                 script {
-                    dir('likeminds-caravan-celery') {
-                        git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
-                        echo 'Caravan-Celery code cloned'
+                    dir('likeminds-skulk') {
+                        git branch: "${params.skulk_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/likeminds-subscription.git'
+                        echo 'skulk code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
-                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
-                            sh '''
-                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
-                            '''
-                        }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        // Add .env file
 
-                        // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        // Build and push the Docker image
+                        echo "Build and push the Docker image" 
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER -f Dockerfile.caravan-celery-load .
-                            docker push ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest -f Dockerfile.skulk-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
+
+                        // Add Run Migrations Step
                     }
 
-                    echo '----------------------Caravan-Celery Docker Image Stage completed----------------------'
+                    echo '-------------------------Skulk Docker Image Stage completed-------------------------'
                 }
             }
         }
 
-        stage("----------------------Terraform action----------------------"){
+        stage("Terraform action"){
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
@@ -258,37 +268,39 @@ pipeline {
                         def terraformVars = ""
 
                         // Terraform variables for the action if not empty
-                        if (env.resource_group_name.trim()) terraformVars += "-var 'resource_group_name=${env.resource_group_name}' "
-                        if (env.resource_location.trim()) terraformVars += "-var 'resource_location=${env.resource_location}' "
-                        if (env.aks_cluster_name.trim()) terraformVars += "-var 'aks_cluster_name=${env.aks_cluster_name}' "
-                        if (env.namespace_name.trim()) terraformVars += "-var 'namespace_name=${env.namespace_name}' "
-                        if (env.kettle_cpu.trim()) terraformVars += "-var 'kettle_cpu=${env.kettle_cpu}' "
-                        if (env.kettle_memory.trim()) terraformVars += "-var 'kettle_memory=${env.kettle_memory}' "
-                        if (env.kettle_pods.trim()) terraformVars += "-var 'kettle_pods=${env.kettle_pods}' "
-                        if (env.swarm_cpu.trim()) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
-                        if (env.swarm_memory.trim()) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
-                        if (env.swarm_pods.trim()) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
-                        if (env.swarm_worker_cpu.trim()) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
-                        if (env.swarm_worker_memory.trim()) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
-                        if (env.swarm_worker_pods.trim()) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
-                        if (env.caravan_cpu.trim()) terraformVars += "-var 'caravan_cpu=${env.caravan_cpu}' "
-                        if (env.caravan_memory.trim()) terraformVars += "-var 'caravan_memory=${env.caravan_memory}' "
-                        if (env.caravan_pods.trim()) terraformVars += "-var 'caravan_pods=${env.caravan_pods}' "
-                        if (env.caravan_celery_cpu.trim()) terraformVars += "-var 'caravan_celery_cpu=${env.caravan_celery_cpu}' "
-                        if (env.caravan_celery_memory.trim()) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
-                        if (env.caravan_celery_pods.trim()) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
-                        if (env.caravan_celery_broker_url.trim()) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
-                        if (env.caravan_rabbitmq_username.trim()) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
-                        if (env.caravan_rabbitmq_password.trim()) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
-                        if (env.skulk_cpu.trim()) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
-                        if (env.skulk_memory.trim()) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
-                        if (env.skulk_pods.trim()) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
+                        if (isNotEmpty(env.resource_group_name)) terraformVars += "-var 'resource_group_name=${env.resource_group_name}' "
+                        if (isNotEmpty(env.resource_location)) terraformVars += "-var 'resource_location=${env.resource_location}' "
+                        if (isNotEmpty(env.aks_cluster_name)) terraformVars += "-var 'aks_cluster_name=${env.aks_cluster_name}' "
+                        if (isNotEmpty(env.namespace_name)) terraformVars += "-var 'namespace_name=${env.namespace_name}' "
+                        if (isNotEmpty(env.kettle_cpu)) terraformVars += "-var 'kettle_cpu=${env.kettle_cpu}' "
+                        if (isNotEmpty(env.kettle_memory)) terraformVars += "-var 'kettle_memory=${env.kettle_memory}' "
+                        if (isNotEmpty(env.kettle_pods)) terraformVars += "-var 'kettle_pods=${env.kettle_pods}' "
+                        if (isNotEmpty(env.swarm_cpu)) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
+                        if (isNotEmpty(env.swarm_memory)) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
+                        if (isNotEmpty(env.swarm_pods)) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
+                        if (isNotEmpty(env.swarm_worker_cpu)) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
+                        if (isNotEmpty(env.swarm_worker_memory)) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
+                        if (isNotEmpty(env.swarm_worker_pods)) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
+                        if (isNotEmpty(env.caravan_cpu)) terraformVars += "-var 'caravan_cpu=${env.caravan_cpu}' "
+                        if (isNotEmpty(env.caravan_memory)) terraformVars += "-var 'caravan_memory=${env.caravan_memory}' "
+                        if (isNotEmpty(env.caravan_pods)) terraformVars += "-var 'caravan_pods=${env.caravan_pods}' "
+                        if (isNotEmpty(env.caravan_celery_cpu)) terraformVars += "-var 'caravan_celery_cpu=${env.caravan_celery_cpu}' "
+                        if (isNotEmpty(env.caravan_celery_memory)) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
+                        if (isNotEmpty(env.caravan_celery_pods)) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
+                        if (isNotEmpty(env.caravan_celery_broker_url)) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
+                        if (isNotEmpty(env.caravan_rabbitmq_username)) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
+                        if (isNotEmpty(env.caravan_rabbitmq_password)) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
+                        if (isNotEmpty(env.skulk_cpu)) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
+                        if (isNotEmpty(env.skulk_memory)) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
+                        if (isNotEmpty(env.skulk_pods)) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
 
                         // Enable parameters
-                        if (params.enable_kettle.trim()) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
-                        if (params.enable_swarm.trim()) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
-                        if (params.enable_caravan.trim()) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
-                        if (params.enable_skulk.trim()) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
+                        if (params.enable_kettle) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
+                        if (params.enable_swarm) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
+                        if (params.enable_caravan) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
+                        if (params.enable_skulk) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
+
+                        echo "Terraform Vars: ${terraformVars}"
 
                         if (params.action == 'plan') {
                             sh """
@@ -306,5 +318,20 @@ pipeline {
 
             }
         }
+    }
+}
+
+// Helper function to check if value is not null or empty (Handles single/double quotes)
+def isNotEmpty(value){ 
+    if (value == null) {
+        return false
+    }
+
+    // Remove surrounding single quotes if they exist
+    value = value.replaceAll(/^['"]|['"]$/, '').trim()
+    if (value.isEmpty()) {
+        return false
+    } else {
+        return true
     }
 }
