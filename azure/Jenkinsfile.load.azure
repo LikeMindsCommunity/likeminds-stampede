@@ -48,21 +48,25 @@ pipeline {
         string(name: 'caravan_branch', defaultValue: 'development', description: 'Caravan branch')
         string(name: 'caravan_celery_branch', defaultValue: 'development', description: 'Caravan Celery branch')
 
-        booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle')
-        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm')
-        booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan')
+        booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle for deployment')
+        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm for deployment')
+        booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan for deployment')
+
+        booleanParam(name: 'build_kettle', defaultValue: false, description: 'Build Kettle & push Docker image')
+        booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
+        booleanParam(name: 'build_caravan', defaultValue: false, description: 'Build Caravan & push Docker image')
     }
 
     stages {
         
-        stage("----------------------Checkout----------------------") {
+        stage("Checkout") {
             steps {
                 checkout scm
-                echo "----------------------Checkout Main Branch stage completed----------------------"
+                echo "-------------------------Checkout Main Branch stage completed-------------------------"
             }
         }
 
-        stage("----------------------Set Azure Environment Variables----------------------") {
+        stage("Set Azure Environment Variables") {
             steps {
                 script {
                     withCredentials([azureServicePrincipal('azure-load-sp-creds')]) {
@@ -75,11 +79,11 @@ pipeline {
                     }
 
                 }
-                echo "----------------------Set Azure Enviornment variables stage completed----------------------"
+                echo "-------------------------Set Azure Enviornment variables stage completed-------------------------"
             }
         }
 
-        stage("----------------------Azure login & kubectl context set----------------------") {
+        stage("Azure login & kubectl context set") {
             steps {
                 script {
                     dir("${env.WORKSPACE_DIR}"){
@@ -92,15 +96,15 @@ pipeline {
                         '''
 
                     }
-                    echo "----------------------Azure login & kubelogin stage completed----------------------"
+                    echo "-------------------------Azure login & kubelogin stage completed-------------------------"
                 }
             }
         }
 
-        stage("----------------------Build Kettle Docker Image----------------------") {
+        stage("Build Kettle Docker Image") {
             when {
                 expression {
-                    return params.enable_kettle && params.action == 'apply'
+                    return params.build_kettle
                 }
             }
             steps {
@@ -109,35 +113,35 @@ pipeline {
                         git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
                         echo 'Kettle code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                                 infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > .env --token=$INFISICAL_TOKEN
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
                         // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        echo "Build and push the Docker image"
                         sh '''
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER -f Dockerfile.kettle-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
                             docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:$BUILD_NUMBER
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
                     }
 
-                echo '----------------------Kettle Docker Image Stage completed----------------------'
+                echo '-------------------------Kettle Docker Image Stage completed-------------------------'
                 }  
             }
         }
 
-        stage("----------------------Build Swarm Docker Image----------------------") {
+        stage("Build Swarm Docker Image") {
             when {
                 expression {
-                    return params.enable_swarm && params.action == 'apply'
+                    return params.build_swarm
                 }
             }
             steps {
@@ -146,7 +150,7 @@ pipeline {
                         git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
                         echo 'swarm code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
@@ -154,28 +158,28 @@ pipeline {
                                 cat ./cmd/server/config/.env
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
                         // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        echo "Build and push the Docker image"
                         sh '''
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER -f Dockerfile.swarm-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER
                             docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
                     }
 
-                echo '----------------------Swarm Docker Image Stage completed----------------------'
+                echo '-------------------------Swarm Docker Image Stage completed-------------------------'
                 }  
             }
         }
 
-        stage("----------------------Build Caravan Docker Image----------------------") {
+        stage("Build Caravan Docker Image") {
             when {
                 expression {
-                    return params.enable_caravan && params.action == 'apply'
+                    return params.build_swarm
                 }
             }
             steps {
@@ -184,7 +188,7 @@ pipeline {
                         git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
                         echo 'Caravan code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
@@ -192,31 +196,31 @@ pipeline {
                                 cat ./project/project/settings/.env
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
 
                         // Build and push the Docker image
-                        echo "----------------------Build and push the Docker image----------------------" 
+                        echo "Build and push the Docker image" 
                         sh '''
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER -f Dockerfile.caravan-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER
                             docker rmi $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
 
                         // Add Run Migrations Step
                     }
 
-                    echo '----------------------Caravan Docker Image Stage completed----------------------'
+                    echo '-------------------------Caravan Docker Image Stage completed-------------------------'
                 }
             }
         }
 
-        stage("----------------------Build Caravan Celery Docker Image----------------------") {
+        stage("Build Caravan Celery Docker Image") {
             when {
                 expression {
-                    return params.enable_caravan && params.action == 'apply'
+                    return params.build_swarm
                 }
             }
             steps {
@@ -225,32 +229,32 @@ pipeline {
                         git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
                         echo 'Caravan-Celery code cloned'
 
-                        echo "----------------------Infisical Login and .ENV exports step----------------------"
+                        echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                                 infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
                             '''
                         }
-                        echo '----------------------Infisical Login and .ENV exports step completed----------------------'
+                        echo 'Infisical Login and .ENV exports step completed'
 
                         // Build and push the Docker image 
-                        echo "----------------------Build and push the Docker image----------------------"
+                        echo "Build and push the Docker image"
                         sh '''
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER -f Dockerfile.caravan-celery-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER
                             docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER
                         '''
-                        echo "----------------------Build and push the Docker image Completed----------------------"
+                        echo "Build and push the Docker image Completed"
                     }
 
-                    echo '----------------------Caravan-Celery Docker Image Stage completed----------------------'
+                    echo '-------------------------Caravan-Celery Docker Image Stage completed-------------------------'
                 }
             }
         }
 
-        stage("----------------------Terraform action----------------------"){
+        stage("Terraform action"){
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
