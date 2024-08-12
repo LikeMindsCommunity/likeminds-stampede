@@ -160,9 +160,9 @@ pipeline {
                         echo "----------------------Build and push the Docker image----------------------"
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER -f Dockerfile.swarm-load .
-                            docker push ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/likeminds-swarm/swarm:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER -f Dockerfile.swarm-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:$BUILD_NUMBER
                         '''
                         echo "----------------------Build and push the Docker image Completed----------------------"
                     }
@@ -199,9 +199,9 @@ pipeline {
                         echo "----------------------Build and push the Docker image----------------------" 
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER -f Dockerfile.caravan-load .
-                            docker push ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/togther/caravan:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER -f Dockerfile.caravan-load .
+                            docker push $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER
+                            docker rmi $ACR_LOGIN_SERVER/togther/caravan:$BUILD_NUMBER
                         '''
                         echo "----------------------Build and push the Docker image Completed----------------------"
 
@@ -238,9 +238,9 @@ pipeline {
                         echo "----------------------Build and push the Docker image----------------------"
                         sh '''
                             az acr login --name $ACR_NAME
-                            docker build -t ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER -f Dockerfile.caravan-celery-load .
-                            docker push ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER
-                            docker rmi ACR_LOGIN_SERVER/togther/caravan-celery:BUILD_NUMBER
+                            docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER -f Dockerfile.caravan-celery-load .
+                            docker push $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER
+                            docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:$BUILD_NUMBER
                         '''
                         echo "----------------------Build and push the Docker image Completed----------------------"
                     }
