@@ -32,11 +32,11 @@ pipeline {
         caravan_celery_memory = ''
         caravan_celery_pods = ''
         caravan_celery_broker_url = ''
-        caravan_rabbitmq_username = ''
-        caravan_rabbitmq_password = ''
-        skulk_cpu = ''
-        skulk_memory = ''
-        skulk_pods = ''
+        // caravan_rabbitmq_username = ''
+        // caravan_rabbitmq_password = ''
+        // skulk_cpu = ''
+        // skulk_memory = ''
+        // skulk_pods = ''
 
     }
 
