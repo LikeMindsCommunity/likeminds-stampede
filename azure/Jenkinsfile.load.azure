@@ -258,16 +258,6 @@ pipeline {
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
-
-                        // Helper function to check if a variable is not null and not empty
-                        def isNotEmpty(value){ 
-                            val = (value != null && (value.trim() != ''))
-
-                            // echo "Value: ${it}"
-                            echo "Value : ${value}"
-                            echo "val: ${val}"
-                            return val
-                        }
                     
                         def terraformVars = ""
 
@@ -333,4 +323,14 @@ pipeline {
             }
         }
     }
+}
+
+ // Helper function to check if a variable is not null and not empty
+def isNotEmpty(string value){ 
+    val = (value != null && (value.trim() != ''))
+
+    // echo "Value: ${it}"
+    echo "Value : ${value}"
+    echo "val: ${val}"
+    return val
 }
