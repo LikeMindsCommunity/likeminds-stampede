@@ -3,8 +3,3 @@ provider "google" {
   project = var.project_id
   region  = var.region
 }
-
-provider "aws" {
-  region = "ap-south-1"
-  profile = "default"
-}
