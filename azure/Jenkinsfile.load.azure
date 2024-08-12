@@ -326,7 +326,7 @@ pipeline {
 }
 
  // Helper function to check if a variable is not null and not empty
-def isNotEmpty(string value){ 
+def isNotEmpty(value){ 
     val = (value != null && (value.trim() != ''))
 
     // echo "Value: ${it}"
