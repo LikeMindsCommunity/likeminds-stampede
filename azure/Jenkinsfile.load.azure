@@ -289,10 +289,10 @@ pipeline {
                         if (env.skulk_pods.trim()) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
 
                         // Enable parameters
-                        if (params.enable_kettle.trim()) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
-                        if (params.enable_swarm.trim()) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
-                        if (params.enable_caravan.trim()) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
-                        if (params.enable_skulk.trim()) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
+                        // if (params.enable_kettle.trim()) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
+                        // if (params.enable_swarm.trim()) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
+                        // if (params.enable_caravan.trim()) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
+                        // if (params.enable_skulk.trim()) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
 
                         if (params.action == 'plan') {
                             sh """
