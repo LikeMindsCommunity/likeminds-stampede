@@ -321,12 +321,11 @@ pipeline {
     }
 }
 
- // Helper function to check if a variable is not null and not empty
+// Helper function to check if a variable is not null and not empty
 def isNotEmpty(value){ 
-    val = (value != null && value.trim() != '') ? true : false
+    val = value != null && value.trim() != ''
 
-    // echo "Value: ${it}"
-    echo "Value : ${value}"
-    echo "val: ${val}"
+    echo "Value : ${value} | isNotEmpty : ${val}"
+
     return val
 }
