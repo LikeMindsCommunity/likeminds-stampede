@@ -330,7 +330,7 @@ def isNotEmpty(value){
     }
 
     // Remove surrounding single quotes if they exist
-    value = value.replaceAll(/^'|'$/, '').trim()
+    value = value.replaceAll(/^['"]|['"]$/, '').trim()
     
     if (value.isEmpty()) {
         echo "Value is false: ${value}"
