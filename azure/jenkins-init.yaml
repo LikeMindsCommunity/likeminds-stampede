@@ -31,17 +31,6 @@ runcmd:
   - systemctl start jenkins
   - systemctl enable jenkins
 
-  # Enable IP forwarding
-  - sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
-  - sh -c 'echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf'
-  - sysctl -p
-
-  # Redirect all port 80 requests to Jenkins on port 8080
-  - apt-get install -y iptables
-  - iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-  - mkdir -p /etc/iptables
-  - sh -c 'iptables-save > /etc/iptables/rules.v4'
-
   # Install Terraform
   - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
   - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
@@ -54,9 +43,13 @@ runcmd:
   # Install Azure CLI
   - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-  # Install Azure Kubernetes Service CLI
+  # Install Azure Kubernetes Service CLIs
   - az aks install-cli
 
   # Add user jenkins to docker group
   - usermod -aG docker jenkins
   - systemctl restart jenkins
+
+  # Install infisical cli
+  - curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | sudo -E bash
+  - apt-get update && apt-get install -y infisical
