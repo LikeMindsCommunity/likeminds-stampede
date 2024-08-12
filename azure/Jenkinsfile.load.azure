@@ -258,35 +258,38 @@ pipeline {
             steps{
                 script{
                     dir("${env.WORKSPACE_DIR}"){
+
+                        // Helper function to check if a variable is not null and not empty
+                        def isNotEmpty = { value -> value != null && value.trim() }
                     
                         def terraformVars = ""
 
                         // Terraform variables for the action if not empty
-                        if (env.resource_group_name?.trim()) terraformVars += "-var 'resource_group_name=${env.resource_group_name}' "
-                        if (env.resource_location?.trim()) terraformVars += "-var 'resource_location=${env.resource_location}' "
-                        if (env.aks_cluster_name?.trim()) terraformVars += "-var 'aks_cluster_name=${env.aks_cluster_name}' "
-                        if (env.namespace_name?.trim()) terraformVars += "-var 'namespace_name=${env.namespace_name}' "
-                        if (env.kettle_cpu?.trim()) terraformVars += "-var 'kettle_cpu=${env.kettle_cpu}' "
-                        if (env.kettle_memory?.trim()) terraformVars += "-var 'kettle_memory=${env.kettle_memory}' "
-                        if (env.kettle_pods?.trim()) terraformVars += "-var 'kettle_pods=${env.kettle_pods}' "
-                        if (env.swarm_cpu?.trim()) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
-                        if (env.swarm_memory?.trim()) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
-                        if (env.swarm_pods?.trim()) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
-                        if (env.swarm_worker_cpu?.trim()) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
-                        if (env.swarm_worker_memory?.trim()) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
-                        if (env.swarm_worker_pods?.trim()) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
-                        if (env.caravan_cpu?.trim()) terraformVars += "-var 'caravan_cpu=${env.caravan_cpu}' "
-                        if (env.caravan_memory?.trim()) terraformVars += "-var 'caravan_memory=${env.caravan_memory}' "
-                        if (env.caravan_pods?.trim()) terraformVars += "-var 'caravan_pods=${env.caravan_pods}' "
-                        if (env.caravan_celery_cpu?.trim()) terraformVars += "-var 'caravan_celery_cpu=${env.caravan_celery_cpu}' "
-                        if (env.caravan_celery_memory?.trim()) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
-                        if (env.caravan_celery_pods?.trim()) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
-                        if (env.caravan_celery_broker_url?.trim()) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
-                        if (env.caravan_rabbitmq_username?.trim()) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
-                        if (env.caravan_rabbitmq_password?.trim()) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
-                        if (env.skulk_cpu?.trim()) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
-                        if (env.skulk_memory?.trim()) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
-                        if (env.skulk_pods?.trim()) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
+                        if (isNotEmpty(env.resource_group_name)) terraformVars += "-var 'resource_group_name=${env.resource_group_name}' "
+                        if (isNotEmpty(env.resource_location?)) terraformVars += "-var 'resource_location=${env.resource_location}' "
+                        if (isNotEmpty(env.aks_cluster_name?)) terraformVars += "-var 'aks_cluster_name=${env.aks_cluster_name}' "
+                        if (isNotEmpty(env.namespace_name?)) terraformVars += "-var 'namespace_name=${env.namespace_name}' "
+                        if (isNotEmpty(env.kettle_cpu?)) terraformVars += "-var 'kettle_cpu=${env.kettle_cpu}' "
+                        if (isNotEmpty(env.kettle_memory?)) terraformVars += "-var 'kettle_memory=${env.kettle_memory}' "
+                        if (isNotEmpty(env.kettle_pods?)) terraformVars += "-var 'kettle_pods=${env.kettle_pods}' "
+                        if (isNotEmpty(env.swarm_cpu?)) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
+                        if (isNotEmpty(env.swarm_memory?)) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
+                        if (isNotEmpty(env.swarm_pods?)) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
+                        if (isNotEmpty(env.swarm_worker_cpu?)) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
+                        if (isNotEmpty(env.swarm_worker_memory?)) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
+                        if (isNotEmpty(env.swarm_worker_pods?)) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
+                        if (isNotEmpty(env.caravan_cpu?)) terraformVars += "-var 'caravan_cpu=${env.caravan_cpu}' "
+                        if (isNotEmpty(env.caravan_memory?)) terraformVars += "-var 'caravan_memory=${env.caravan_memory}' "
+                        if (isNotEmpty(env.caravan_pods?)) terraformVars += "-var 'caravan_pods=${env.caravan_pods}' "
+                        if (isNotEmpty(env.caravan_celery_cpu?)) terraformVars += "-var 'caravan_celery_cpu=${env.caravan_celery_cpu}' "
+                        if (isNotEmpty(env.caravan_celery_memory?)) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
+                        if (isNotEmpty(env.caravan_celery_pods?)) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
+                        if (isNotEmpty(env.caravan_celery_broker_url?)) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
+                        if (isNotEmpty(env.caravan_rabbitmq_username?)) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
+                        if (isNotEmpty(env.caravan_rabbitmq_password?)) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
+                        if (isNotEmpty(env.skulk_cpu?)) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
+                        if (isNotEmpty(env.skulk_memory?)) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
+                        if (isNotEmpty(env.skulk_pods?)) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
 
                         // Enable parameters
                         if (params.enable_kettle) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
