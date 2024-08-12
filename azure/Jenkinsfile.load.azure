@@ -10,34 +10,6 @@ pipeline {
 
         RESOURCE_GROUP = 'likeminds-load-resource-group'
         AKS_CLUSTER = 'likeminds-load-k8s-cluster'
-
-        // Variables for terraform action | To be passed in from Jenkins job
-        // resource_group_name = ''
-        // aks_cluster_name = ''
-        // resource_location = ''
-        // namespace_name = ''
-        // kettle_cpu = ''
-        // kettle_memory = ''
-        // kettle_pods = ''
-        // swarm_cpu = ''
-        // swarm_memory = ''
-        // swarm_pods = ''
-        // swarm_worker_cpu = ''
-        // swarm_worker_memory = ''
-        // swarm_worker_pods = ''
-        // caravan_cpu = ''
-        // caravan_memory = ''
-        // caravan_pods = ''
-        // caravan_celery_cpu = ''
-        // caravan_celery_memory = ''
-        // caravan_celery_pods = ''
-        // caravan_celery_broker_url = ''
-        // caravan_rabbitmq_username = ''
-        // caravan_rabbitmq_password = ''
-        // skulk_cpu = ''
-        // skulk_memory = ''
-        // skulk_pods = ''
-
     }
 
     parameters {
@@ -282,15 +254,9 @@ pipeline {
                         if (isNotEmpty(env.caravan_celery_memory)) terraformVars += "-var 'caravan_celery_memory=${env.caravan_celery_memory}' "
                         if (isNotEmpty(env.caravan_celery_pods)) terraformVars += "-var 'caravan_celery_pods=${env.caravan_celery_pods}' "
                         if (isNotEmpty(env.caravan_celery_broker_url)) terraformVars += "-var 'caravan_celery_broker_url=${env.caravan_celery_broker_url}' "
-                        if (isNotEmpty(env.caravan_rabbitmq_username)){
-                            terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
-                            echo "RabbitMQ Username: ${env.caravan_rabbitmq_username}"
-                        } 
+                        if (isNotEmpty(env.caravan_rabbitmq_username)) terraformVars += "-var 'caravan_rabbitmq_username=${env.caravan_rabbitmq_username}' "
                         if (isNotEmpty(env.caravan_rabbitmq_password)) terraformVars += "-var 'caravan_rabbitmq_password=${env.caravan_rabbitmq_password}' "
-                        if (isNotEmpty(env.skulk_cpu)){
-                            terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
-                            echo "Skulk CPU: ${env.skulk_cpu}"
-                        } 
+                        if (isNotEmpty(env.skulk_cpu)) terraformVars += "-var 'skulk_cpu=${env.skulk_cpu}' "
                         if (isNotEmpty(env.skulk_memory)) terraformVars += "-var 'skulk_memory=${env.skulk_memory}' "
                         if (isNotEmpty(env.skulk_pods)) terraformVars += "-var 'skulk_pods=${env.skulk_pods}' "
 
@@ -300,7 +266,7 @@ pipeline {
                         if (params.enable_caravan) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
                         if (params.enable_skulk) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
 
-                        echo "terraformVars: ${terraformVars}"
+                        echo "Terraform Vars: ${terraformVars}"
 
                         if (params.action == 'plan') {
                             sh """
@@ -321,22 +287,17 @@ pipeline {
     }
 }
 
-// Helper function to check if a variable is not null and not empty
+// Helper function to check if value is not null or empty (Handles single/double quotes)
 def isNotEmpty(value){ 
-
     if (value == null) {
-        echo "Value is null: ${value}"
         return false
     }
 
     // Remove surrounding single quotes if they exist
     value = value.replaceAll(/^['"]|['"]$/, '').trim()
-    
     if (value.isEmpty()) {
-        echo "Value is false: ${value}"
         return false
     } else {
-        echo "Value is true: ${value}"
         return true
     }
 }
