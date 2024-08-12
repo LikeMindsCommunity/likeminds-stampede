@@ -300,10 +300,6 @@ pipeline {
                         if (params.enable_caravan) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
                         if (params.enable_skulk) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
 
-                        // Iterate over all environment variables and print them
-                        env.each { key, value ->
-                            echo "${key} = ${value}"
-                        }
                         echo "terraformVars: ${terraformVars}"
 
                         if (params.action == 'plan') {
@@ -327,7 +323,7 @@ pipeline {
 
  // Helper function to check if a variable is not null and not empty
 def isNotEmpty(value){ 
-    val = (value != null && (value.trim() != ''))
+    val = (value != null && value.trim() != '') ? true : false
 
     // echo "Value: ${it}"
     echo "Value : ${value}"
