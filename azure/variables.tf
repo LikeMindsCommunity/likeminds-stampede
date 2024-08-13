@@ -154,6 +154,18 @@ variable "caravan_rabbitmq_app_name" {
   default = "caravan-rabbitmq-load"
 }
 
+variable "caravan_rabbitmq_cpu" {
+  description = "caravan rabbitmq cpu"
+  type = string
+  default = "0.5"
+}
+
+variable "caravan_rabbitmq_memory" {
+  description = "caravan rabbitmq memory"
+  type = string
+  default = "512Mi"
+}
+
 variable "caravan_rabbitmq_app_docker_image" {
   description = "caravan rabbitmq app docker image"
   type = string

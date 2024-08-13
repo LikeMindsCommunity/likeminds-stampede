@@ -127,9 +127,9 @@ pipeline {
                         echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
+                                mkdir ./cmd/server/config
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/.env --token=$INFISICAL_TOKEN
-                                cat ./cmd/server/.env
+                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
                             '''
                         }
                         echo 'Infisical Login and .ENV exports step completed'
@@ -165,9 +165,9 @@ pipeline {
                         echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
+                                mkdir ./cmd/server/config
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/.env --token=$INFISICAL_TOKEN
-                                cat ./cmd/server/.env
+                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
                             '''
                         }
                         echo 'Infisical Login and .ENV exports step completed'

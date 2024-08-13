@@ -53,6 +53,13 @@ resource "kubernetes_deployment" "caravan-rabbitmq-load" {
         container {
           image = var.caravan_rabbitmq_app_docker_image
           name  = var.caravan_rabbitmq_app_name
+
+          resources {
+            limits = {
+              cpu    = var.caravan_rabbitmq_cpu
+              memory = var.caravan_rabbitmq_memory
+            }
+          }
           port {
             container_port = local.http_port_5672
           }
