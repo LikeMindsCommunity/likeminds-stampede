@@ -245,7 +245,7 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
-                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+                                infisical export --env=load --projectId=cc310d9a-779b-4218-8e25-3fb6c152ecbb  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
                             '''
                         }
                         echo 'Infisical Login and .ENV exports step completed'
