@@ -120,7 +120,7 @@ variable "caravan_celery_app_name" {
 variable "caravan_celery_app_docker_image" {
   description = "The docker image of caravan celery app"
   type = string
-  default = "likemindsloadregistry.azurecr.io/togther/caravan"
+  default = "likemindsloadregistry.azurecr.io/togther/caravan-celery"
 }
 
 variable "caravan_celery_cpu" {

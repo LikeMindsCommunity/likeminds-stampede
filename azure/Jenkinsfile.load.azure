@@ -191,6 +191,43 @@ pipeline {
             }
         }
 
+        stage("Build Caravan Celery Docker Image") {
+            when {
+                expression {
+                    return params.build_caravan
+                }
+            }
+            steps {
+                script {
+                    dir('likeminds-caravan-celery') {
+                        git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        echo 'Caravan-Celery code cloned'
+
+                        echo "Infisical Login and .ENV exports step"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=936af601-d912-416b-958f-35f09a21309f  > ./project/project/settings/.env --token=$INFISICAL_TOKEN
+                            '''
+                        }
+                        echo 'Infisical Login and .ENV exports step completed'
+
+                        // Build and push the Docker image 
+                        echo "Build and push the Docker image"
+                        sh '''
+                            az acr login --name $ACR_NAME
+                            docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:latest -f Dockerfile.caravan-celery-load .
+                            docker push $ACR_LOGIN_SERVER/togther/caravan-celery:latest
+                            docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
+                        '''
+                        echo "Build and push the Docker image Completed"
+                    }
+
+                    echo '-------------------------Caravan-Celery Docker Image Stage completed-------------------------'
+                }
+            }
+        }
+
         stage("Build Skulk Docker Image") {
             when {
                 expression {
