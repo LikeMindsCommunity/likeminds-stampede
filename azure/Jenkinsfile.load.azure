@@ -28,7 +28,7 @@ pipeline {
         booleanParam(name: 'build_kettle', defaultValue: false, description: 'Build Kettle & push Docker image')
         booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
         booleanParam(name: 'build_caravan', defaultValue: false, description: 'Build Caravan & push Docker image')
-        booleanParam(name: 'build_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
+        // booleanParam(name: 'build_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
     }
 
     stages {
@@ -127,7 +127,7 @@ pipeline {
                         echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
-                                mkdir ./cmd/server/config
+                                mkdir -p ./cmd/server/config
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                                 infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
                             '''
@@ -165,7 +165,7 @@ pipeline {
                         echo "Infisical Login and .ENV exports step"
                         withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
                             sh '''
-                                mkdir ./cmd/server/config
+                                mkdir -p ./cmd/server/config
                                 INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
                                 infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/config/.env --token=$INFISICAL_TOKEN
                             '''
