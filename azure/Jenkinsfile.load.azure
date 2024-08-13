@@ -238,7 +238,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-caravan-celery') {
-                        git branch: "${params.caravan_celery_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
                         echo 'Caravan-Celery code cloned'
 
                         echo "Infisical Login and .ENV exports step"
