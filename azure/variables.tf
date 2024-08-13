@@ -219,7 +219,7 @@ variable "swarm_worker_app_name" {
 variable "swarm_worker_app_docker_image" {
   description = "The Docker image for the Swarm worker app."
   type        = string
-  default     = "likemindsloadregistry.azurecr.io/likeminds-swarm/swarm"
+  default     = "likemindsloadregistry.azurecr.io/likeminds-swarm/swarm-worker"
 }
 
 variable "swarm_worker_cpu" {

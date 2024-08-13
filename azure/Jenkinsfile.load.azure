@@ -150,6 +150,44 @@ pipeline {
             }
         }
 
+        stage("Build Swarm-worker Docker Image") {
+            when {
+                expression {
+                    return params.build_swarm
+                }
+            }
+            steps {
+                script {
+                    dir('likeminds-swarm-worker') {
+                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
+                        echo 'swarm code cloned'
+
+                        echo "Infisical Login and .ENV exports step"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=65366600-18f7-4041-88c3-7e73c0fbbc83 > ./cmd/server/.env --token=$INFISICAL_TOKEN
+                                cat ./cmd/server/.env
+                            '''
+                        }
+                        echo 'Infisical Login and .ENV exports step completed'
+
+                        // Build and push the Docker image 
+                        echo "Build and push the Docker image"
+                        sh '''
+                            az acr login --name $ACR_NAME
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest -f Dockerfile.swarm-worker-load .
+                            docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
+                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
+                        '''
+                        echo "Build and push the Docker image Completed"
+                    }
+
+                echo '-------------------------Swarm-worker Docker Image Stage completed-------------------------'
+                }  
+            }
+        }
+
         stage("Build Caravan Docker Image") {
             when {
                 expression {
