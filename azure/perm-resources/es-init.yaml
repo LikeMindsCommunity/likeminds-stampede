@@ -1,0 +1,10 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - docker.io
+
+runcmd:
+  - systemctl start docker
+  - systemctl enable docker
+  - docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e 'discovery.type=single-node' -e 'ELASTIC_USERNAME=${ELASTIC_USERNAME}' -e 'ELASTIC_PASSWORD=${ELASTIC_PASSWORD}' docker.elastic.co/elasticsearch/elasticsearch:7.10.1

@@ -1,5 +1,8 @@
 # Local .terraform directories
 **/.terraform/*
+*.log
+
+kubeconfig
 
 # .tfstate files
 *.tfstate
