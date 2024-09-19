@@ -85,6 +85,12 @@ resource "kubernetes_deployment" "caravan-rabbitmq-load" {
             }
           }
         }
+        toleration {
+          key = "CriticalAddonsOnly"
+          operator = "Equal"
+          value = "true"
+          effect = "NoSchedule"
+        }
       }
     }
   }
