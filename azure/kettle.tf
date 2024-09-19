@@ -36,6 +36,12 @@ resource "kubernetes_deployment" "kettle-deployment" {
             }
           }
         }
+        toleration {
+          key = "CriticalAddonsOnly"
+          operator = "Equal"
+          value = "true"
+          effect = "NoSchedule"
+        }
       }
     }
   }
