@@ -218,7 +218,7 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan:latest -f Dockerfile.caravan-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan:latest
-                            docker rmi $ACR_LOGIN_SERVER/togther/caravan:latest
+                            // docker rmi $ACR_LOGIN_SERVER/togther/caravan:latest
                         '''
                         echo "Build and push the Docker image Completed"
 
