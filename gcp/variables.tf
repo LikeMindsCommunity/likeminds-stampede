@@ -70,6 +70,30 @@ variable "swarm_pods" {
   description = "swarm pods count"
 }
 
+variable "enable_pandemonium" {
+  description = "if to enable pandemonium service"
+}
+
+variable "pandemonium_app_name" {
+  description = "pandemonium service app name"
+}
+
+variable "pandemonium_app_docker_image" {
+  description = "pandemonium service docker image"
+}
+
+variable "pandemonium_cpu" {
+  description = "pandemonium cpu"
+}
+
+variable "pandemonium_memory" {
+  description = "pandemonium memory"
+}
+
+variable "pandemonium_pods" {
+  description = "pandemonium pods count"
+}
+
 variable "enable_caravan" {
   description = "if to enable caravan service"
 }

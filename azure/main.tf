@@ -45,5 +45,6 @@ locals {
   kettle_load_host = "kettle-loadtest.likeminds.community"
   caravan_load_host = "caravan-loadtest.likeminds.community"
   swarm_load_host = "swarm-loadtest.likeminds.community"
+  pandemonium_load_host = "pandemonium-loadtest.likeminds.community"
   skulk_load_host = "skulk-loadtest.likeminds.community"
 }

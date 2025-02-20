@@ -252,6 +252,43 @@ variable "swarm_worker_pods" {
   default     = 1
 }
 
+## Pandemonium Variables
+variable "enable_pandemonium" {
+  description = "If to enable the Pandemonium app."
+  type        = bool
+  default     = false
+}
+
+variable "pandemonium_app_name" {
+  description = "The name of the Pandemonium app."
+  type        = string
+  default     = "pandemonium-load"
+}
+
+variable "pandemonium_app_docker_image" {
+  description = "The Docker image for the Pandemonium app."
+  type        = string
+  default     = "likemindsloadregistry.azurecr.io/likeminds-pandemonium/pandemonium"
+}
+
+variable "pandemonium_cpu" {
+  description = "The CPU limit for the Pandemonium app."
+  type        = string
+  default     = "0.5"
+}
+
+variable "pandemonium_memory" {
+  description = "The memory limit for the Pandemonium app."
+  type        = string
+  default     = "1Gi"
+}
+
+variable "pandemonium_pods" {
+  description = "The number of pods for the Pandemonium app."
+  type        = number
+  default     = 1
+}
+
 ## Skulk Variables
 variable "enable_skulk" {
   description = "if to enable skulk app"
