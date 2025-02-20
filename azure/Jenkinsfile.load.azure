@@ -359,7 +359,7 @@ pipeline {
                         if (isNotEmpty(env.swarm_pods)) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
                         if (isNotEmpty(env.pandemonium_cpu)) terraformVars += "-var 'pandemonium_cpu=${env.pandemonium_cpu}' "
                         if (isNotEmpty(env.pandemonium_memory)) terraformVars += "-var 'pandemonium_memory=${env.pandemonium_memory}' "
-                        if (isNotEmpty(env.pandemonium_pods)) terraformVars += "-var 'spandemonium_pods=${env.pandemonium_pods}' "
+                        if (isNotEmpty(env.pandemonium_pods)) terraformVars += "-var 'pandemonium_pods=${env.pandemonium_pods}' "
                         if (isNotEmpty(env.swarm_worker_cpu)) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
                         if (isNotEmpty(env.swarm_worker_memory)) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
                         if (isNotEmpty(env.swarm_worker_pods)) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
