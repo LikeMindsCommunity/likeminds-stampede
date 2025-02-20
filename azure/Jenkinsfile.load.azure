@@ -23,7 +23,7 @@ pipeline {
 
         booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle for deployment')
         booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm for deployment')
-        booleanParam(name: 'enable_pandemomium', defaultValue: false, description: 'Enable Pandemonium for deployment')
+        booleanParam(name: 'enable_pandemonium', defaultValue: false, description: 'Enable Pandemonium for deployment')
         booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan for deployment')
         booleanParam(name: 'enable_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
 
