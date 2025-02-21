@@ -49,6 +49,12 @@ variable "kettle_app_name" {
   default     = "kettle-load"
 }
 
+variable "kettle_ws_app_name" {
+  description = "The name of the Kettle-ws app."
+  type        = string
+  default     = "kettle-ws-load"
+}
+
 variable "kettle_app_docker_image" {
   description = "The Docker image for the Kettle app."
   type        = string
