@@ -20,7 +20,8 @@ data "kubernetes_namespace" "namespace" {
 locals {
   app_version = "0.1.0"
 
-  http_port_service = "http" 
+  http_port_service = "http"
+  ws_port_service = "ws" 
   amqp_port_service = "amqp"
 
   http_port_8000 = 8000

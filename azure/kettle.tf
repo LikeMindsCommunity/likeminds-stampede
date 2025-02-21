@@ -59,7 +59,7 @@ resource "kubernetes_service" "kettle-service" {
       target_port = local.http_port_8080
     }
     port {
-      name        = local.http_port_service
+      name        = local.ws_port_service
       port        = local.http_port_8083
       target_port = local.http_port_8083
     }
