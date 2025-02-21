@@ -58,6 +58,11 @@ resource "kubernetes_service" "kettle-service" {
       port        = local.http_port_8080
       target_port = local.http_port_8080
     }
+    port {
+      name        = local.http_port_service
+      port        = local.http_port_8083
+      target_port = local.http_port_8083
+    }
     type = local.type_cluster_ip
   }
 }
@@ -91,6 +96,47 @@ resource "kubernetes_ingress_v1" "kettle-ingress" {
               name = var.kettle_app_name
               port {
                 number = local.http_port_8080
+              }
+            }
+          }
+        }
+      }
+    }
+    tls {
+       secret_name = local.load_domain_tls_secret_name
+    }
+  }
+}
+
+# Create kubernetes ingress for kettle-ws
+resource "kubernetes_ingress_v1" "kettle-ws-ingress" {
+  count = var.enable_kettle ? 1 : 0
+
+  depends_on = [data.kubernetes_namespace.namespace,]
+  
+  metadata {
+    name = var.kettle_app_name
+    namespace = var.namespace_name
+
+    annotations = {
+        "kubernetes.io/ingress.allow-http": "true"
+        # "nginx.ingress.kubernetes.io/ssl-redirect" = "false"
+    }
+  }
+
+  spec {
+    ingress_class_name = local.ingress_class_name
+    rule {
+      host = local.kettle_ws_load_host
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = var.kettle_app_name
+              port {
+                number = local.http_port_8083
               }
             }
           }
