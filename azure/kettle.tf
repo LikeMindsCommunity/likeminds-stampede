@@ -115,7 +115,7 @@ resource "kubernetes_ingress_v1" "kettle-ws-ingress" {
   depends_on = [data.kubernetes_namespace.namespace,]
   
   metadata {
-    name = var.kettle_app_name
+    name = var.kettle_ws_app_name
     namespace = var.namespace_name
 
     annotations = {
