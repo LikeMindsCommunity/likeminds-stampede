@@ -103,8 +103,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest -f Dockerfile.kettle-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -141,8 +141,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest -f Dockerfile.swarm-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -179,8 +179,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest -f Dockerfile.swarm-worker-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -257,8 +257,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:latest -f Dockerfile.caravan-celery-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan-celery:latest
-                            docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
                         echo "Build and push the Docker image Completed"
                     }
 
