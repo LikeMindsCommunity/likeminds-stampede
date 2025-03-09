@@ -70,6 +70,12 @@ resource "kubernetes_deployment" "caravan-celery-load" {
             }
           }
         }
+        toleration {
+          key = "CriticalAddonsOnly"
+          operator = "Equal"
+          value = "true"
+          effect = "NoSchedule"
+        }
       }
     }
   }

@@ -43,6 +43,12 @@ resource "kubernetes_deployment" "swarm-worker-load" {
             }
           }
         }
+        toleration {
+          key = "CriticalAddonsOnly"
+          operator = "Equal"
+          value = "true"
+          effect = "NoSchedule"
+        }
       }
     }
   }
