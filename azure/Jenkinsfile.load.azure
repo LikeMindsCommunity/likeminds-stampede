@@ -31,6 +31,7 @@ pipeline {
         booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
         booleanParam(name: 'build_pandemonium', defaultValue: false, description: 'Build Pandemonium & push Docker image')
         booleanParam(name: 'build_caravan', defaultValue: false, description: 'Build Caravan & push Docker image')
+        booleanParam(name: 'build_caravan_celery', defaultValue: false, description: 'Build Caravan-Celery & push Docker image')
         // booleanParam(name: 'build_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
     }
 
@@ -105,8 +106,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest -f Dockerfile.kettle-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-authentication/kettle:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -143,8 +144,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest -f Dockerfile.swarm-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -219,8 +220,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest -f Dockerfile.swarm-worker-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-swarm/swarm-worker:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -258,10 +259,10 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan:latest -f Dockerfile.caravan-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan:latest
-                            docker rmi $ACR_LOGIN_SERVER/togther/caravan:latest
                         '''
                         echo "Build and push the Docker image Completed"
 
+                        // docker rmi $ACR_LOGIN_SERVER/togther/caravan:latest
                         // Manually Run Migrations Step
                     }
 
@@ -273,7 +274,7 @@ pipeline {
         stage("Build Caravan Celery Docker Image") {
             when {
                 expression {
-                    return params.build_caravan
+                    return params.build_caravan_celery
                 }
             }
             steps {
@@ -297,8 +298,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/togther/caravan-celery:latest -f Dockerfile.caravan-celery-load .
                             docker push $ACR_LOGIN_SERVER/togther/caravan-celery:latest
-                            docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/togther/caravan-celery:latest
                         echo "Build and push the Docker image Completed"
                     }
 
