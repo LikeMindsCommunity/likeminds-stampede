@@ -17,18 +17,21 @@ pipeline {
 
         string(name: 'kettle_branch', defaultValue: 'development', description: 'Kettle branch')
         string(name: 'swarm_branch', defaultValue: 'development', description: 'Swarm branch')
+        string(name: 'pandemonium_branch', defaultValue: 'development', description: 'Pandemonium branch')
         string(name: 'caravan_branch', defaultValue: 'development', description: 'Caravan branch')
         string(name: 'skulk_branch', defaultValue: 'development', description: 'Skulk Celery branch')
 
         booleanParam(name: 'enable_kettle', defaultValue: false, description: 'Enable Kettle for deployment')
+        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm for deployment')
+        booleanParam(name: 'enable_pandemonium', defaultValue: false, description: 'Enable Pandemonium for deployment')
         booleanParam(name: 'enable_caravan', defaultValue: false, description: 'Enable Caravan for deployment')
         booleanParam(name: 'enable_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
-        booleanParam(name: 'enable_swarm', defaultValue: false, description: 'Enable Swarm for deployment')
 
         booleanParam(name: 'build_kettle', defaultValue: false, description: 'Build Kettle & push Docker image')
+        booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
+        booleanParam(name: 'build_pandemonium', defaultValue: false, description: 'Build Pandemonium & push Docker image')
         booleanParam(name: 'build_caravan', defaultValue: false, description: 'Build Caravan & push Docker image')
         booleanParam(name: 'build_caravan_celery', defaultValue: false, description: 'Build Caravan-Celery & push Docker image')
-        booleanParam(name: 'build_swarm', defaultValue: false, description: 'Build Swarm & push Docker image')
         // booleanParam(name: 'build_skulk', defaultValue: false, description: 'Build Skulk & push Docker image')
     }
 
@@ -147,6 +150,44 @@ pipeline {
                     }
 
                 echo '-------------------------Swarm Docker Image Stage completed-------------------------'
+                }  
+            }
+        }
+
+        stage("Build Pandemonium Docker Image") {
+            when {
+                expression {
+                    return params.build_pandemonium
+                }
+            }
+            steps {
+                script {
+                    dir('likeminds-pandemonium') {
+                        git branch: "${params.pandemonium_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:LikeMindsCommunity/likeminds-pandemonium.git'
+                        echo 'pandemonium code cloned'
+
+                        echo "Infisical Login and .ENV exports step"
+                        withCredentials([usernamePassword(credentialsId: 'infisical-LikeMinds-2-identity-creds', usernameVariable: 'INFISICAL_CLIENT_ID', passwordVariable: 'INFISICAL_CLIENT_SECRET')]) {
+                            sh '''
+                                mkdir -p ./cmd/server/config
+                                INFISICAL_TOKEN=$(infisical login --method=universal-auth --client-id=$INFISICAL_CLIENT_ID --client-secret=$INFISICAL_CLIENT_SECRET --silent --plain)
+                                infisical export --env=load --projectId=a51c433e-2512-48f8-a5c1-5fabd65ce7a3 > .env --token=$INFISICAL_TOKEN
+                            '''
+                        }
+                        echo 'Infisical Login and .ENV exports step completed'
+
+                        // Build and push the Docker image 
+                        echo "Build and push the Docker image"
+                        sh '''
+                            az acr login --name $ACR_NAME
+                            docker build -t $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest -f Dockerfile.pandemonium .
+                            docker push $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest
+                        '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest
+                        echo "Build and push the Docker image Completed"
+                    }
+
+                echo '-------------------------Pandemonium Docker Image Stage completed-------------------------'
                 }  
             }
         }
@@ -287,8 +328,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest -f Dockerfile.skulk-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
                         echo "Build and push the Docker image Completed"
 
                         // Add Run Migrations Step
@@ -317,6 +358,9 @@ pipeline {
                         if (isNotEmpty(env.swarm_cpu)) terraformVars += "-var 'swarm_cpu=${env.swarm_cpu}' "
                         if (isNotEmpty(env.swarm_memory)) terraformVars += "-var 'swarm_memory=${env.swarm_memory}' "
                         if (isNotEmpty(env.swarm_pods)) terraformVars += "-var 'swarm_pods=${env.swarm_pods}' "
+                        if (isNotEmpty(env.pandemonium_cpu)) terraformVars += "-var 'pandemonium_cpu=${env.pandemonium_cpu}' "
+                        if (isNotEmpty(env.pandemonium_memory)) terraformVars += "-var 'pandemonium_memory=${env.pandemonium_memory}' "
+                        if (isNotEmpty(env.pandemonium_pods)) terraformVars += "-var 'pandemonium_pods=${env.pandemonium_pods}' "
                         if (isNotEmpty(env.swarm_worker_cpu)) terraformVars += "-var 'swarm_worker_cpu=${env.swarm_worker_cpu}' "
                         if (isNotEmpty(env.swarm_worker_memory)) terraformVars += "-var 'swarm_worker_memory=${env.swarm_worker_memory}' "
                         if (isNotEmpty(env.swarm_worker_pods)) terraformVars += "-var 'swarm_worker_pods=${env.swarm_worker_pods}' "
@@ -336,6 +380,7 @@ pipeline {
                         // Enable parameters
                         if (params.enable_kettle) terraformVars += "-var 'enable_kettle=${params.enable_kettle}' "
                         if (params.enable_swarm) terraformVars += "-var 'enable_swarm=${params.enable_swarm}' "
+                        if (params.enable_pandemonium) terraformVars += "-var 'enable_pandemonium=${params.enable_pandemonium}' "
                         if (params.enable_caravan) terraformVars += "-var 'enable_caravan=${params.enable_caravan}' "
                         if (params.enable_skulk) terraformVars += "-var 'enable_skulk=${params.enable_skulk}' "
 

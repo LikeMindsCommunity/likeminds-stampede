@@ -20,12 +20,14 @@ data "kubernetes_namespace" "namespace" {
 locals {
   app_version = "0.1.0"
 
-  http_port_service = "http" 
+  http_port_service = "http"
+  ws_port_service = "ws" 
   amqp_port_service = "amqp"
 
   http_port_8000 = 8000
   http_port_8080 = 8080
   http_port_8081 = 8081
+  http_port_8083 = 8083
   http_port_15672 = 15672
   http_port_5672 = 5672
 
@@ -43,7 +45,9 @@ locals {
   rabbitmq_default_password_key = "RABBITMQ_DEFAULT_PASS"
 
   kettle_load_host = "kettle-loadtest.likeminds.community"
+  kettle_ws_load_host = "kettle-ws-loadtest.likeminds.community"
   caravan_load_host = "caravan-loadtest.likeminds.community"
   swarm_load_host = "swarm-loadtest.likeminds.community"
+  pandemonium_load_host = "pandemonium-loadtest.likeminds.community"
   skulk_load_host = "skulk-loadtest.likeminds.community"
 }
