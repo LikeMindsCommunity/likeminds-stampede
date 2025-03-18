@@ -182,8 +182,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest -f Dockerfile.pandemonium .
                             docker push $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-pandemonium/pandemonium:latest
                         echo "Build and push the Docker image Completed"
                     }
 
@@ -328,8 +328,8 @@ pipeline {
                             az acr login --name $ACR_NAME
                             docker build -t $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest -f Dockerfile.skulk-load .
                             docker push $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
-                            docker rmi $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
                         '''
+                        // docker rmi $ACR_LOGIN_SERVER/likeminds-subscription/skulk:latest
                         echo "Build and push the Docker image Completed"
 
                         // Add Run Migrations Step
