@@ -16,3 +16,7 @@ This project helps us to deploy the replica of all the existing microservices, h
 
 - [Engineering Document](https://likemindscommunity.atlassian.net/wiki/spaces/PRT/pages/1973354513/Load+Testing+Framework)
 - [Load Test Guide](https://likemindscommunity.atlassian.net/wiki/spaces/PRT/pages/2036171142/Steps+to+Load+Test)
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
