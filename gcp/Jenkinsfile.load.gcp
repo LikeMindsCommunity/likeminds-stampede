@@ -21,7 +21,7 @@ pipeline {
                 echo 'Kettle Selected'
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${kettle_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/LikeMinds-Authentication/'
+                        git branch: "${kettle_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/LikeMindsCommunity/likeminds-kettle/'
                         sh 'echo "Kettle code cloned"'
 
                         sh 'gcloud auth configure-docker asia.gcr.io'
@@ -48,7 +48,7 @@ pipeline {
                 echo 'Swarm Selected'
                 script {
                     dir('likeminds-swarm') {
-                        git branch: "${swarm_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/LikeMinds-Swarm/'
+                        git branch: "${swarm_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/LikeMindsCommunity/likeminds-swarm/'
                         sh 'echo "Swarm code cloned"'
 
                         sh 'gcloud auth configure-docker asia.gcr.io'
@@ -75,7 +75,7 @@ pipeline {
                 echo 'Caravan Selected'
                 script {
                     dir('likeminds-caravan') {
-                        git branch: "${caravan_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/Togther/'
+                        git branch: "${caravan_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/likeminds-caravan/'
                         sh 'echo "Caravan code cloned"'
 
                         sh """
@@ -111,7 +111,7 @@ pipeline {
                 echo 'Caravan Celery Selected'
                 script {
                     dir('likeminds-caravan-celery') {
-                        git branch: "${caravan_celery_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/Togther/'
+                        git branch: "${caravan_celery_branch}", credentialsId: 'df5b81c3-2bfe-4938-a421-5f55f996e76a', url: 'https://github.com/NateshR/likeminds-caravan/'
                         sh 'echo "Caravan Celery code cloned"'
 
                         sh 'gcloud auth configure-docker asia.gcr.io'
