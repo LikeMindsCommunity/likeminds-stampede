@@ -88,7 +88,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-authentication') {
-                        git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-authentication.git'
+                        git branch: "${params.kettle_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:LikeMindsCommunity/likeminds-kettle.git'
                         echo 'Kettle code cloned'
 
                         echo "Infisical Login and .ENV exports step"
@@ -125,7 +125,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-swarm') {
-                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
+                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:LikeMindsCommunity/likeminds-swarm.git'
                         echo 'swarm code cloned'
 
                         echo "Infisical Login and .ENV exports step"
@@ -201,7 +201,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-swarm-worker') {
-                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:NateshR/likeMinds-swarm.git'
+                        git branch: "${params.swarm_branch}", credentialsId: 'gitHub-ssh-shubh	', url: 'git@github.com:LikeMindsCommunity/likeminds-swarm.git'
                         echo 'swarm code cloned'
 
                         echo "Infisical Login and .ENV exports step"
@@ -239,7 +239,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-caravan') {
-                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/likeminds-caravan.git'
                         echo 'Caravan code cloned'
 
                         echo "Infisical Login and .ENV exports step"
@@ -280,7 +280,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-caravan-celery') {
-                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/togther.git'
+                        git branch: "${params.caravan_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/likeminds-caravan.git'
                         echo 'Caravan-Celery code cloned'
 
                         echo "Infisical Login and .ENV exports step"
@@ -317,7 +317,7 @@ pipeline {
             steps {
                 script {
                     dir('likeminds-skulk') {
-                        git branch: "${params.skulk_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:NateshR/likeminds-subscription.git'
+                        git branch: "${params.skulk_branch}", credentialsId: 'gitHub-ssh-shubh', url: 'git@github.com:LikeMindsCommunity/likeminds-skulk.git'
                         echo 'skulk code cloned'
 
                         // Add .env file
